@@ -1,0 +1,83 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="org.tpmobile.minghuidaily.ui.MainActivity">
+
+    <item
+        android:id="@+id/action_open_calendar"
+        android:icon="@drawable/ic_action_calendar"
+        android:title="@string/action_open_calendar"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_zoom"
+        android:icon="@drawable/ic_action_zoom"
+        android:title="@string/action_zoom"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_browse_history"
+        android:icon="@drawable/ic_action_browse_history"
+        android:title="@string/action_browse_history"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_clean_history"
+        android:icon="@drawable/ic_action_clean_history"
+        android:title="@string/action_clean_history"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_theme"
+        android:icon="@drawable/ic_action_nightlight"
+        android:title="@string/action_switch_theme"
+        app:showAsAction="ifRoom">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/action_theme_night"
+                    android:title="@string/action_theme_night" />
+                <item
+                    android:id="@+id/action_theme_light"
+                    android:title="@string/action_theme_light" />
+                <!--<item android:id="@+id/action_theme_system" android:title="跟随系统"/>-->
+            </group>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/action_set_proxy"
+        android:icon="@drawable/ic_action_set_proxy"
+        android:title="@string/action_set_proxy"
+        app:showAsAction="ifRoom">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/action_proxy_freegate"
+                    android:title="@string/action_vpn_freegate_8590" />
+                <item
+                    android:id="@+id/action_proxy_wujie"
+                    android:title="@string/action_vpn_wujie_19966" />
+                <item
+                    android:id="@+id/action_proxy_none"
+                    android:title="@string/action_vpn_none"
+                    android:visible="false"/>
+            </group>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/action_exit_app"
+        android:title="@string/action_exit_app"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_about"
+        android:title="@string/action_about"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_test"
+        android:title="@string/action_test"
+        android:visible="false"
+        app:showAsAction="never" />
+    <!--<item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_action_settings"
+        android:orderInCategory="100"
+        android:title="@string/action_settings"
+        app:showAsAction="ifRoom" />
+        -->
+</menu>
