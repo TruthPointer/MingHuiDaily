@@ -31,6 +31,10 @@ import java.io.File
 import java.text.DecimalFormat
 import java.util.Date
 
+/**
+ * Author: Truth Seeker
+ * Copyright org.tpmobile
+ */
 ////////////////////////////////////////
 //Int, Long
 ////////////////////////////////////////
