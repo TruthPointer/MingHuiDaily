@@ -1,5 +1,7 @@
 package org.tpmobile.minghuidaily.ui
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.DialogInterface
 import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
@@ -11,11 +13,12 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.webkit.SslErrorHandler
+import android.webkit.WebChromeClient
+import android.webkit.WebChromeClient.CustomViewCallback
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -33,8 +36,11 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.webkit.WebViewCompat
+import androidx.webkit.WebViewFeature
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.tpmobile.minghuidaily.MyApp
@@ -67,7 +73,6 @@ import org.tpmobile.minghuidaily.util.ktx.setPref
 import org.tpmobile.minghuidaily.util.ktx.toFileNamePart
 import org.tpmobile.minghuidaily.util.ktx.toFilePath
 import org.tpmobile.minghuidaily.util.ktx.toast
-import org.tpmobile.minghuidaily.widget.VideoEnabledWebChromeClient
 import java.io.File
 import java.util.Calendar
 import java.util.Date
@@ -90,6 +95,12 @@ class MainActivity : AppCompatActivity() {
     private var isLargeHtmlFile: Boolean = false
     private var isFirstPageStarted: Boolean = false
 
+    private var lastScrollY: Int = 0
+
+    private var lastOrientation: Int = 0
+    private var loadingView: View? = null
+    private var fullScreenView: View? = null
+    private var fullScreenViewCallback: CustomViewCallback? = null
     private var tvLoadingInfo: TextView? = null
     private var tvAdditionalInfo: TextView? = null
     private var pbLoading: ProgressBar? = null
@@ -110,7 +121,6 @@ class MainActivity : AppCompatActivity() {
         dispatchOnBackEvent()
         initView()
         initViewModel()
-        //checkNightMode()
         createPageCss()
 
         checkAndLoadMyUrl(selectedDate)
@@ -192,7 +202,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
 
-            R.id.action_exit_app ->{
+            R.id.action_exit_app -> {
                 finish()
                 true
             }
@@ -223,6 +233,39 @@ class MainActivity : AppCompatActivity() {
         super.onConfigurationChanged(newConfig)
     }*/
 
+    override fun onResume() {
+        Logger.i("onResume()")
+        super.onResume()
+        binding.webView.apply {
+            onResume()
+            resumeTimers()
+        }
+
+    }
+
+    override fun onPause() {
+        Logger.i("onPause()")
+        super.onPause()
+        binding.webView.apply {
+            onPause()
+            pauseTimers()
+        }
+    }
+
+    override fun onDestroy() {
+        binding.webView.apply {
+            loadUrl("about:blank")
+            stopLoading()
+            //webViewClient = null
+            settings.javaScriptEnabled = false
+            webChromeClient = null
+            clearHistory()
+            removeAllViews()
+            destroy()
+        }
+        super.onDestroy()
+    }
+
     /////////////////////////////////////
     fun switchNightMode(nightModState: Int) {
         MyApp.Companion.currentNightMode = nightModState
@@ -232,26 +275,21 @@ class MainActivity : AppCompatActivity() {
         changePageCss()
     }
 
-    /*fun checkNightMode(){
-        currentNightMode = getPref(resources.getString(R.string.theme_selected), AppCompatDelegate.MODE_NIGHT_NO)
-        if(currentNightMode != delegate.localNightMode){
-            delegate.localNightMode = currentNightMode
-        }
-    }*/
-
     fun dispatchOnBackEvent() {
         onBackPressedDispatcher.addCallback(
             this,
             onBackPressedCallback = object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    if (binding.includedContentMain.webView.canGoBack()) {
+                    if (inFullScreenState()) {
+                        hideFullScreenView()
+                    } else if (binding.webView.canGoBack()) {
                         Logger.i(TAG, "webView.canGoBack() = true")
-                        binding.includedContentMain.webView.goBack()
+                        binding.webView.goBack()
                     } else {
                         if ((System.currentTimeMillis() - exitTime) > 2000) {
                             toast(R.string.quit_the_app_after_pressing_back_key_once_again)
                             exitTime = System.currentTimeMillis()
-                        }else{
+                        } else {
                             finish()
                         }
                     }
@@ -277,7 +315,7 @@ class MainActivity : AppCompatActivity() {
         )
         supportActionBar?.title = ""
 
-        with(binding.includedContentMain.webView.settings) {
+        with(binding.webView.settings) {
             javaScriptEnabled = true
             javaScriptCanOpenWindowsAutomatically = true
             useWideViewPort = true
@@ -293,10 +331,10 @@ class MainActivity : AppCompatActivity() {
             //layoutAlgorithm = WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING
             mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
         }
-        binding.includedContentMain.webView.webViewClient = object : WebViewClient() {
+        binding.webView.webViewClient = object : WebViewClient() {
 
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                binding.includedContentMain.webView.clearHistory()
+                binding.webView.clearHistory()
                 super.onPageStarted(view, url, favicon)
                 Logger.i(TAG, "onPageStarted")
                 isFirstPageStarted = true
@@ -331,13 +369,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val loadingView = layoutInflater.inflate(R.layout.view_loading_video, null)
-        binding.includedContentMain.webView.webChromeClient = object : VideoEnabledWebChromeClient(
-            null,
-            binding.fullscreenLayout as ViewGroup,
-            loadingView,
-            binding.includedContentMain.webView,
-        ) {
+        binding.webView.webChromeClient = object : WebChromeClient() {
             override fun getDefaultVideoPoster(): Bitmap? {
                 return try {
                     super.getDefaultVideoPoster()
@@ -360,16 +392,56 @@ class MainActivity : AppCompatActivity() {
                     closeTaskDialog()
             }
 
-        }.apply {
-            setOnToggledFullscreen(object :
-                VideoEnabledWebChromeClient.ToggledFullscreenCallback {
-                override fun toggledFullscreen(fullscreen: Boolean) { //toggle();
-                    Logger.i(TAG, "=========toggle===========")
-                    runOnUiThread {
-                        toggle(fullscreen)
-                    }
+            override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
+                binding.webView.visibility = View.INVISIBLE
+                Logger.i(
+                    TAG,
+                    "[onShowCustomView] fullScreenView = null ? ${fullScreenView == null}"
+                )
+                if (fullScreenView != null) {
+                    fullScreenViewCallback?.onCustomViewHidden()
+                    return
                 }
-            })
+                lastScrollY = binding.webView.scrollY
+                lastOrientation = requestedOrientation
+                Logger.i(TAG, "lastScrollY = $lastScrollY, lastOrientation = $lastOrientation")
+
+                toggle(true)
+
+                binding.fullscreenLayout.visibility = View.VISIBLE
+                binding.fullscreenLayout.addView(view)
+                fullScreenView = view
+                fullScreenViewCallback = callback
+
+                super.onShowCustomView(view, callback)
+            }
+
+            override fun onHideCustomView() {
+                Logger.i(
+                    TAG,
+                    "[onHideCustomView] fullScreenView = null ? ${fullScreenView == null}"
+                )
+                if (fullScreenView == null) return
+                fullScreenViewCallback?.onCustomViewHidden()
+                toggle(false)
+
+                binding.fullscreenLayout.visibility = View.GONE
+                binding.fullscreenLayout.removeAllViews()
+                fullScreenView = null
+                binding.webView.visibility = View.VISIBLE
+
+                binding.webView.postDelayed({
+                    binding.webView.scrollTo(0, lastScrollY)
+                }, if (isLargeHtmlFile) 5000 else 1000)
+                super.onHideCustomView()
+            }
+
+            override fun getVideoLoadingProgressView(): View? {
+                if (loadingView == null) {
+                    loadingView = layoutInflater.inflate(R.layout.view_loading_video, null)
+                }
+                return loadingView //super.getVideoLoadingProgressView()
+            }
         }
     }
 
@@ -377,7 +449,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.getProgress().observe(this) { taskInfo ->
             if (taskInfo.taskName == TaskInfo.Companion.TASK_NAME_LOAD_URL) {
                 val showTvAdditionalInfo = taskDialog?.isShowing == true && isLargeHtmlFile
-                Logger.i( TAG,"tvAdditionalInfo可见情况：$showTvAdditionalInfo")
+                Logger.i(TAG, "tvAdditionalInfo可见情况：$showTvAdditionalInfo")
                 tvAdditionalInfo?.visibility =
                     if (showTvAdditionalInfo) {
                         View.VISIBLE
@@ -402,7 +474,7 @@ class MainActivity : AppCompatActivity() {
 
     /////////////////////////////////////
     private fun showZoomWebViewDialog() {
-        if(!isFirstPageStarted){
+        if (!isFirstPageStarted) {
             toast(R.string.info_no_loaded_page)
             return
         }
@@ -490,14 +562,14 @@ class MainActivity : AppCompatActivity() {
                     DateUtils.parse("2026-1-19")!!,
                     zipWithPic
                 ) { date, withPic ->
-                    runTasksForNewsDisplay(date, withPic)
+                    runTasksForNewsDisplay(this, date, withPic)
                 }
             } else {
                 showTaskRunningDialog(
                     selectedDate,
                     zipWithPic
                 ) { date, withPic ->
-                    runTasksForNewsDisplay(date, withPic)
+                    runTasksForNewsDisplay(this, date, withPic)
                 }
             }
         }
@@ -690,6 +762,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun runTasksForNewsDisplay(
+        context: Context,
         date: Date,
         withPic: Boolean,
         delZipAfterUnzip: Boolean = true
@@ -713,33 +786,45 @@ class MainActivity : AppCompatActivity() {
 
             //1.download
             taskIndex++
-            var filePath: String
+            var filePath: String = ""
             val baseUrl = PageUtil.getBaseUrl(date, withPic)
-            if (!test) {
-                val url = HttpUtil.getDownloadUrl(date, withPic)
-                filePath = HttpUtil.downloadFile(url, onProgress = { progress, info ->
+            val url = HttpUtil.getDownloadUrl(date, withPic)
+            HttpUtil.downloadFile(
+                context,
+                url,
+                onProgress = { progress, info ->
                     dispatchProgressInfo(
                         taskIndex,
                         TaskInfo.Companion.TASK_NAME_DOWNLOAD,
                         progress,
                         info
                     )
-                })
-                if (filePath.isEmpty()) {
-                    Logger.e(TAG, "下载出错了")
+                }).fold(
+                onSuccess = { path ->
+                    Logger.i("成功下载")
+                    context.toast("下载成功")
+                    filePath = path
+                },
+                onFailure = { e ->
+                    Logger.e("下载出错了，详情：${e.message}")
+                    dispatchProgressInfo(
+                        taskIndex,
+                        TaskInfo.Companion.TASK_NAME_DOWNLOAD,
+                        -1,
+                        e.message ?: "原因不详"
+                    )
+                    delay(1000)
                     closeTaskDialog()
                     return@launch
                 }
-            } else {
-                filePath = filesDir.absolutePath + File.separator + baseUrl + ".zip"
-            }
+            )
 
             Logger.i(TAG, "filePah = $filePath")
             //2.unzip
             if (!isActive) return@launch
             taskIndex++
             val zipFile = File(filePath)
-            var result = ZipUtil.unZipFileWithProgress(
+            ZipUtil.unZipFileWithProgress(
                 zipFile,
                 zipFile.parent!! + File.separator + baseUrl,
                 onProgress = { progress, info ->
@@ -750,12 +835,23 @@ class MainActivity : AppCompatActivity() {
                         info
                     )
                 }
+            ).fold(
+                onSuccess = {
+                    Logger.i("解压完成1")
+                },
+                onFailure = { e ->
+                    Logger.e(TAG, "解压出错了")
+                    dispatchProgressInfo(
+                        taskIndex,
+                        TaskInfo.Companion.TASK_NAME_UNZIP,
+                        -1,
+                        e.message ?: "原因不详"
+                    )
+                    delay(1000)
+                    closeTaskDialog()
+                    return@launch
+                }
             )
-            if (!result) {
-                Logger.e(TAG, "解压出错了")
-                closeTaskDialog()
-                return@launch
-            }
             if (delZipAfterUnzip) {
                 zipFile.delete()
             }
@@ -763,7 +859,7 @@ class MainActivity : AppCompatActivity() {
             //3.modify
             if (!isActive) return@launch
             taskIndex++
-            result = PageUtil.modifyHtml(
+            PageUtil.modifyHtml(
                 date,
                 zipWithPic,
                 resources.displayMetrics.widthPixels * 9 / 10,
@@ -776,12 +872,23 @@ class MainActivity : AppCompatActivity() {
                         info
                     )
                 }
+            ).fold(
+                onSuccess = {
+                    Logger.e(TAG, "完成文件处理")
+                },
+                onFailure = { e ->
+                    Logger.e(TAG, "处理文件出错了,详情：${e.message}")
+                    dispatchProgressInfo(
+                        taskIndex,
+                        TaskInfo.Companion.TASK_NAME_MODIFY_HTML_FILE,
+                        -1,
+                        e.message ?: "原因不详"
+                    )
+                    delay(1000)
+                    closeTaskDialog()
+                    return@launch
+                }
             )
-            if (!result) {
-                Logger.e(TAG, "处理文件出错了")
-                closeTaskDialog()
-                return@launch
-            }
 
             //4.loadUrl
             if (!isActive) return@launch
@@ -816,7 +923,7 @@ class MainActivity : AppCompatActivity() {
                 return@launch
             }
             dispatchProgressInfo(taskIndex, taskName, 100, "修改样式文件成功")
-            if(!isFirstPageStarted){
+            if (!isFirstPageStarted) {
                 runOnUiThread { toast(R.string.info_no_loaded_page) }
                 return@launch
             }
@@ -825,7 +932,7 @@ class MainActivity : AppCompatActivity() {
             dispatchProgressInfo(taskIndex, taskName, 0, "开始加载网页...")
             launch(Dispatchers.Main) {
                 Logger.i(TAG, "runTasksForWebViewReload: webview.reload...")
-                binding.includedContentMain.webView.reload()
+                binding.webView.reload()
             }
         }
     }
@@ -844,23 +951,25 @@ class MainActivity : AppCompatActivity() {
                 0,
                 "开始清理存档..."
             )
-            val result = FileUtil.clearFiles(list) { progress, info ->
+            FileUtil.clearFiles(list) { progress, info ->
                 dispatchProgressInfo(
                     taskIndex,
                     TaskInfo.Companion.TASK_NAME_CLEAN_HISTORY,
                     progress,
                     info
                 )
-            }
-            if (result.isNotEmpty()) {
-                dispatchProgressInfo(
-                    taskIndex,
-                    TaskInfo.Companion.TASK_NAME_CLEAN_HISTORY,
-                    -1,
-                    result
-                )
-                return@launch
-            }
+            }.fold(
+                onSuccess = {},
+                onFailure = { e ->
+                    dispatchProgressInfo(
+                        taskIndex,
+                        TaskInfo.Companion.TASK_NAME_CLEAN_HISTORY,
+                        -1,
+                        e.message ?: "原因不详"
+                    )
+                    return@launch
+                }
+            )
             runOnUiThread { toast(R.string.info_clear_history_ok) }
             dispatchProgressInfo(
                 taskIndex,
@@ -914,6 +1023,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun inFullScreenState() = fullScreenView != null
+
+    @SuppressLint("WrongConstant")
+    fun hideFullScreenView() {
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.GET_WEB_CHROME_CLIENT)) {
+            WebViewCompat.getWebChromeClient(binding.webView)?.onHideCustomView()
+        }
+        if (lastOrientation != requestedOrientation)
+            setRequestedOrientation(lastOrientation)
+    }
+
     @Suppress("DEPRECATION")
     private fun toggle(fullscreen: Boolean) {
         if (fullscreen) {
@@ -956,8 +1076,14 @@ class MainActivity : AppCompatActivity() {
             //2.
             supportActionBar?.hide()
         } else {
-            //0.
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            //0.20260211 取消
+            //requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            Logger.i(
+                TAG,
+                "currentOrientation = $requestedOrientation, lastOrientation = $lastOrientation"
+            )
+            if (lastOrientation != requestedOrientation)
+                setRequestedOrientation(lastOrientation)
             //1.
             val attrs = window.attributes
             attrs.flags = attrs.flags and WindowManager.LayoutParams.FLAG_FULLSCREEN.inv()
@@ -1054,10 +1180,13 @@ class MainActivity : AppCompatActivity() {
         Logger.i("WebView", "path = $file, ${if (isLargeHtmlFile) "较大文件" else ""}")
         val htmlString = File(file).readText()
 
-        binding.includedContentMain.webView.loadDataWithBaseURL(
+        binding.webView.loadUrl(file)
+
+        //20260211 取消，此会导致跳转问题
+        /*binding.webView.loadDataWithBaseURL(
             "file://$basePath",
-            htmlString, "text/html", "utf-8", null
-        )
+            file, "text/html", "utf-8", null
+        )*/
     }
 
     fun createPageCss() {
