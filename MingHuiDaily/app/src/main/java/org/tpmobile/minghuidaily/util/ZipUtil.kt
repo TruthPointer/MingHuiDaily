@@ -33,7 +33,7 @@ object ZipUtil {
         destFilePath: String,
         password: String = "",
         onProgress: ((progress: Int, info: String) -> Unit)? = null
-    ): Boolean = withContext(Dispatchers.IO) {
+    ): Result<Boolean> = withContext(Dispatchers.IO) {
         var job: Job? = null
         try {
             onProgress?.invoke(0, "开始解压...")
@@ -41,8 +41,7 @@ object ZipUtil {
             val zFile = ZipFile(zipFile)
             //zFile.charset = Charset.forName(("GBK"))
             if (!zFile.isValidZipFile()) { //
-                onProgress?.invoke(-1, "压缩文件无效，解压失败！")
-                return@withContext false
+                return@withContext Result.failure(Exception("压缩文件无效，解压失败！"))
             }
             val destDir = File(destFilePath)
             if (destDir.isDirectory() && !destDir.exists()) {
@@ -58,13 +57,12 @@ object ZipUtil {
             zFile.isRunInThread = true //true 在子线程中进行解压 , false主线程中解压
             zFile.extractAll(destFilePath)
 
-            return@withContext true
+            return@withContext Result.success(true)
         } catch (e: Exception) {
             Logger.e(TAG, "Error: ${e.message}")
             job?.cancel()
-            onProgress?.invoke(-1, "解压失败，详情：${e.message ?: "原因不详"}")
             e.printStackTrace()
-            return@withContext false
+            return@withContext Result.failure(Exception(e))
         }
     }
 
