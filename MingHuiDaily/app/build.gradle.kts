@@ -1,7 +1,5 @@
 import groovy.xml.XmlSlurper
-import groovy.xml.slurpersupport.GPathResult
 import groovy.xml.slurpersupport.Node
-import org.jetbrains.kotlin.gradle.utils.loadPropertyFromResources
 
 plugins {
     alias(libs.plugins.android.application)
@@ -26,17 +24,17 @@ android {
     }
 
     buildTypes {
-        debug{
+        debug {
             resValue("string", "app_name", "MHDaily")
-            buildConfigField ("boolean", "MY_DEBUG", "true")
+            buildConfigField("boolean", "MY_DEBUG", "true")
         }
         release {
             resValue("string", "app_name", "明慧新闻")
-            buildConfigField( "boolean", "MY_DEBUG", "false")
+            buildConfigField("boolean", "MY_DEBUG", "false")
 
-            isDebuggable=false
-            isMinifyEnabled=true
-            isShrinkResources=true
+            isDebuggable = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -49,7 +47,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
-        buildConfig  = true
+        buildConfig = true
         resValues = true
     }
 }
@@ -78,14 +76,14 @@ dependencies {
 
 }
 
-fun getVersionNameFromResources() : String{
+fun getVersionNameFromResources(): String {
     val stringsFile = file("src/main/res/values/strings.xml")
     val xml = XmlSlurper().parse(stringsFile)
     var versionName: String? = null
     //println(xml.childNodes().forEach { node -> println((node as Node).attributes()) })
     xml.childNodes().forEach { node ->
-        (node as Node).attributes().forEach { ss->
-            if(ss.value == "version_name") {
+        (node as Node).attributes().forEach { ss ->
+            if (ss.value == "version_name") {
                 versionName = node.text().toString()
             }
         }
