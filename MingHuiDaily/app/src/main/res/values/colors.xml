@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+  <!--  <color name="color_gold">#2c71ea</color>
+    <color name="color_light_gray">#121212</color>&lt;!&ndash;212121 000000 &ndash;&gt;-->
+    <color name="color_gold">#ffd700</color><!--2c71ea-->
+    <color name="color_light_gray">#DEDEDE</color><!--DEDEDE 000000 -->
+
+    <color name="light_blue_600">#FF039BE5</color>
+    <color name="light_blue_900">#FF01579B</color>
+    <color name="light_blue_A200">#FF40C4FF</color>
+    <color name="light_blue_A400">#FF00B0FF</color>
+    <color name="black_overlay">#66000000</color>
+
+    <!--调色板-->
+    <color name="color_FFFFFF">#FFFFFF</color>
+
+    <color name="color_121212">#121212</color>
+    <color name="color_000000">#000000</color>
+
+    <color name="color_6200EE">#6200EE</color>
+    <color name="color_3700B3">#3700B3</color>
+    <color name="color_BB86FC">#BB86FC</color>
+    <color name="color_03DAC6">#03DAC6</color>
+    <color name="color_018786">#018786</color>
+
+    <color name="color_B00020">#B00020</color>
+    <color name="color_CF6679">#CF6679</color>
+
+    <color name="color_FFD700">#FFD700</color><!---->
+    <color name="color_FFA500">#FFA500</color><!---->
+
+    <!---->
+    <color name="color_category_border_unselected">#9CA4E4</color><!--818ef7-->
+    <color name="color_category_border_selected">#FCCD0A</color><!--818ef7-->
+    <color name="color_category_fill_selected">#FCCD0A</color><!--818ef7-->
+    <color name="color_category_unselected_bg_gold">#cdffffff</color><!--金色 -->
+    <color name="color_category_selected_bg_gold">#455afb</color><!--金色cdffd700 -->
+
+    <color name="color_category_fill_unselected_xjw">#FFF2BE</color>
+    <color name="color_category_text_unselected_xjw">#455afb</color>
+
+    <color name="color_history_item_day_stroke_unselected">#9CA4E4</color>
+    <color name="color_history_item_day_solid_unselected">#cdffffff</color>
+
+    <color name="color_dialog_about_text">#455afb</color>
+
+
+</resources>

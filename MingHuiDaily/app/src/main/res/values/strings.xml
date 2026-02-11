@@ -1,0 +1,69 @@
+<resources>
+    <!--<string name="app_name">明慧新闻</string>-->
+    <string name="app_name_cn">明慧新闻</string>
+    <string name="version_name" translatable="false">V1.0.20260211</string>
+    <string name="dialog_title_about">明慧新闻 V1.0.20260211</string>
+     <!-- 明慧新闻 -->
+    <string name="title_activity_fullscreen">图片展示</string>
+
+    <string name="action_open_calendar">选择浏览日期</string>
+    <string name="action_zoom">网页缩放</string>
+    <string name="action_set_proxy">选择代理</string>
+    <string name="action_browse_history">历史存档</string>
+    <string name="action_clean_history">清理存档</string>
+    <string name="action_switch_theme">切换主题</string>
+    <string name="action_theme_night">夜间模式</string>
+    <string name="action_theme_light">白天模式</string>
+    <string name="action_vpn_freegate_8590">自由门VPN（端口：8590）</string>
+    <string name="action_vpn_wujie_19966">无界一点通（端口：19966）</string>
+    <string name="action_vpn_none">无代理</string>
+    <string name="action_settings">设置</string>
+    <string name="action_about">关于</string>
+    <string name="action_test">测试</string>
+    <string name="action_exit_app">退出程序</string>
+
+    <string name="zoom_web_view_font_size">请滑动圆形按钮以调整字体的放大比例</string>
+
+    <string name="dialog_button_cancel_tasks">取消任务</string>
+    <string name="dialog_result_ok">确定</string>
+    <string name="dialog_result_cancel">取消</string>
+    <string name="dialog_tip">提示</string>
+    <string name="dialog_about">关于</string>
+    <string name="dialog_clean_history">清理存档</string>
+    <string name="dialog_browse_history">历史存档</string>
+    <string name="dialog_button_clean_all_history">清空所有</string>
+    <string name="dialog_button_clean_selected_history">清空所选</string>
+    <string name="dialog_button_browse_history">浏览</string>
+    <string name="dialog_button_i_know">我知道了</string>
+    <string name="confirmation_about_cancel_tasks">确定要取消当前的任务？</string>
+    <string name="confirmation_about_clean_selected_history">确定要清理存档吗？</string>
+    <string name="confirmation_about_clean_all_history">确定要清理所有存档吗？</string>
+
+    <string name="tips_error">错误</string>
+    <string name="parameters_error">参数错误</string>
+
+    <string name="exit_player">要退出播放窗口嗎？</string>
+
+    <string name="select_date_in_calendar">请选择日期</string>
+    <string name="date_selected_is_same_with_current_date">所选日期与当前日期相同！</string>
+    <string name="date_selected_is_out_of_range">所选日期超过可提供的范围！</string>
+
+    <string name="loading">正在加载…</string>
+    <string name="load_ok">加载成功</string>
+    <string name="load_fail">加载失败</string>
+
+    <string name="info_clear_history_ok">成功完成存档清理！</string>
+    <string name="info_no_history_info">没有存档信息！</string>
+    <string name="info_please_select_cleaning_date">请选择需要清理的日期！</string>
+    <string name="info_please_select_one_date">请选择一个日期！</string>
+    <string name="info_load_large_file">【提示】当前网页文件比较大，加载需要一点时间（30秒左右），请您耐心等待...</string>
+    <string name="info_running">运行信息</string>
+    <string name="info_no_loaded_page">网页尚未加载！</string>
+    <string name="error_date_format">日期格式错误！</string>
+    <string name="quit_the_app_after_pressing_back_key_once_again">再按一次返回键退出程序！</string>
+
+    <string name="download_all_files">下载全部文件：</string>
+    <string name="download_without_pic">无图片</string>
+    <string name="download_with_pic">小图片</string>
+
+</resources>

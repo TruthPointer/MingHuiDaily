@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="color_category_border_unselected">#DEDEDE</color>
+    <color name="color_category_border_selected">#FCCD0A</color>
+    <color name="color_category_fill_selected">#FCCD0A</color>
+
+    <color name="color_category_unselected_bg_gold">#cdffffff</color><!--金色 -->
+    <color name="color_category_selected_bg_gold">#455afb</color><!--金色cdffd700 -->
+
+    <color name="color_history_item_day_stroke_unselected">#FFD700</color>
+    <color name="color_history_item_day_solid_unselected">#DEDEDE</color>
+
+    <color name="color_dialog_about_text">#FFA500</color>
+
+</resources>

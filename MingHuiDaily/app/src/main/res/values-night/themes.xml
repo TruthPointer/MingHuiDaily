@@ -1,0 +1,34 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.MingHuiDaily" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your dark theme here. -->
+        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+
+        <item name="colorPrimary">@color/color_FFD700</item>
+        <item name="colorPrimaryVariant">@color/color_FFA500</item>
+        <item name="colorSecondary">@color/color_FFD700</item>
+        <item name="colorSecondaryVariant">@color/color_018786</item>
+
+        <!--<item name="toolbarColor">@color/color_121212</item>-->
+        <item name="android:colorBackground">@color/color_000000</item>
+        <item name="colorSurface">@color/color_121212</item>
+        <item name="colorError">@color/color_CF6679</item>
+
+        <item name="colorOnPrimary">@color/color_FFFFFF</item>
+        <item name="colorOnSecondary">@color/color_000000</item>
+        <item name="colorOnBackground">@color/color_FFFFFF</item>
+        <item name="colorOnSurface">@color/color_FFFFFF</item>
+        <item name="colorOnError">@color/color_000000</item>
+
+        <!--system/platform attr-->
+        <item name="android:statusBarColor">@color/color_000000</item>
+        <item name="android:windowBackground">?android:colorBackground</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+    </style>
+
+    <style name="ThemeOverlay.MingHuiDaily.FullscreenContainer" parent="">
+        <item name="fullscreenBackgroundColor">@color/light_blue_900</item>
+        <item name="fullscreenTextColor">@color/light_blue_A400</item>
+    </style>
+</resources>

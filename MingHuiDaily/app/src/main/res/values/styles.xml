@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--<style name="Dialog.Day" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:textColor">@color/colorGold</item>
+    </style>
+
+    <style name="Dialog.Night" parent="Theme.AppCompat.DayNight.Dialog">
+        <item name="android:textColor">@color/colorGold</item>
+    </style>-->
+
+    <style name="CalendarTheme" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="Widget.Theme.MingHuiDaily.ActionBar.Fullscreen" parent="Widget.AppCompat.ActionBar">
+        <item name="android:background">@color/black_overlay</item>
+    </style>
+
+    <style name="Widget.Theme.MingHuiDaily.ButtonBar.Fullscreen" parent="">
+        <item name="android:background">@color/black_overlay</item>
+        <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
+    </style>
+
+</resources>

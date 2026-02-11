@@ -1,0 +1,48 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.MingHuiDaily" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+        <item name="colorPrimary">@color/color_6200EE</item>
+        <item name="colorPrimaryVariant">@color/color_3700B3</item>
+        <item name="colorSecondary">@color/color_03DAC6</item>
+        <item name="colorSecondaryVariant">@color/color_018786</item>
+
+        <!--<item name="toolbarColor">@color/color_6200EE</item>-->
+        <item name="android:colorBackground">@color/color_FFFFFF</item>
+        <item name="colorSurface">@color/color_FFFFFF</item>
+        <item name="colorError">@color/color_B00020</item>
+
+        <item name="colorOnPrimary">@color/color_FFFFFF</item>
+        <item name="colorOnSecondary">@color/color_000000</item>
+        <item name="colorOnBackground">@color/color_000000</item>
+        <item name="colorOnSurface">@color/color_000000</item>
+        <item name="colorOnError">@color/color_FFFFFF</item>
+
+        <!--system/platform attr-->
+        <item name="android:statusBarColor">@color/color_3700B3</item>
+        <item name="android:windowBackground">?android:colorBackground</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="actionOverflowButtonStyle">@style/MyOverflowButtonStyle</item>
+
+    </style>
+
+    <style name="MyOverflowButtonStyle" parent="Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:tint">?attr/colorOnPrimary</item>
+    </style>
+
+    <style name="Theme.MingHuiDaily" parent="Base.Theme.MingHuiDaily" />
+
+    <style name="Theme.MingHuiDaily.Fullscreen" parent="Theme.MingHuiDaily">
+        <item name="android:actionBarStyle">@style/Widget.Theme.MingHuiDaily.ActionBar.Fullscreen
+        </item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowBackground">@null</item>
+    </style>
+
+    <style name="ThemeOverlay.MingHuiDaily.FullscreenContainer" parent="">
+        <item name="fullscreenBackgroundColor">@color/light_blue_600</item>
+        <item name="fullscreenTextColor">@color/light_blue_A200</item>
+    </style>
+</resources>
