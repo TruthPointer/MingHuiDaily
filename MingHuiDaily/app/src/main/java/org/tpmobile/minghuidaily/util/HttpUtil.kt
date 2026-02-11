@@ -1,6 +1,7 @@
 package org.tpmobile.minghuidaily.util
 
 
+import android.content.Context
 import androidx.webkit.ProxyConfig
 import androidx.webkit.ProxyController
 import androidx.webkit.WebViewFeature
@@ -8,10 +9,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import org.tpmobile.minghuidaily.MyApp
+import org.tpmobile.minghuidaily.util.ktx.toHumanReadableSize
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
-import java.net.Proxy
 import java.net.URL
 import java.util.Date
 
@@ -92,15 +93,15 @@ object HttpUtil {
     }
 
     suspend fun downloadFile(
+        context: Context,
         urlString: String,
-        proxy: Proxy = MyApp.proxy,
         onProgress: ((Int, String) -> Unit)? = null
-    ): String = withContext(Dispatchers.IO) {
+    ): Result<String> = withContext(Dispatchers.IO) {
         // 打开连接
         try {
             onProgress?.invoke(0, "开始下载...")
 
-            val connection = URL(urlString).openConnection(proxy) as HttpURLConnection
+            val connection = URL(urlString).openConnection() as HttpURLConnection
             connection.connectTimeout = 15000
             connection.readTimeout = 15000
             connection.requestMethod = "GET"
@@ -108,13 +109,14 @@ object HttpUtil {
 
             if (connection.responseCode != HttpURLConnection.HTTP_OK) {
                 // 转到 catch{} 部分处理了，onProgress?.invoke(-1, "下载失败，详情：服务器响应异常")
-                throw Exception("服务器响应错误: ${connection.responseCode} ${connection.responseMessage}")
+                throw kotlin.Exception(Exception("服务器响应错误: ${connection.responseCode} ${connection.responseMessage}"))
             }
 
             // 准备文件路径
             val fileLength = connection.contentLength
             val fileName = File(urlString).name//"download_${System.currentTimeMillis()}.dat"
-            val file = File(MyApp.appContext.filesDir, fileName)
+            val file = File(context.cacheDir, fileName)
+            Logger.i(TAG, "fileName = $fileName, fileLength = $fileLength")
 
             // 流操作
             connection.inputStream.use { input ->
@@ -130,25 +132,22 @@ object HttpUtil {
                         // 计算进度并回调
                         if (fileLength > 0) {
                             val progress = (total * 100 / fileLength).toInt()
-                            val detail = "${total / 1024} KB / ${fileLength / 1024} KB"
-                            onProgress?.invoke(
-                                progress,
-                                if (progress < 100) "下载进度：$detail" else "下载成功"
-                            )
+                            val detail =
+                                "${total.toHumanReadableSize()}/${fileLength.toHumanReadableSize()}"
+                            onProgress?.invoke(progress, detail)
                         } else {
                             // 如果服务器没返回长度，只显示已下载大小
-                            onProgress?.invoke(-2, "已下载：${total / 1024} KB")
+                            onProgress?.invoke(-2, "已下载：${total.toHumanReadableSize()}")
                         }
                     }
                 }
             }
-            return@withContext file.absolutePath
+            onProgress?.invoke(100, "下载成功")
+            return@withContext Result.success(file.absolutePath)
         } catch (e: Exception) {
             Logger.e(TAG, e.message ?: "错误原因不详")
-            onProgress?.invoke(-1, "下载失败，详情：${e.message ?: "原因不详"}")
-            return@withContext ""
+            return@withContext Result.failure(Exception(e))
         }
-
     }
 
 
