@@ -28,12 +28,20 @@ object PageUtil {
         var textColor = "#000000"
         var aLinkColor = "#0000FF"
         var fontTextColor = "#0000FF"
+        var aGoTopBorderColor = "#0000FF"
+        var aGoTopBgR = 219
+        var aGoTopBgG = 234
+        var aGoTopBgB = 254
 
         if (nightTheme) {
             bgColor = "#000000"
             textColor = "#FFFFFF"
             aLinkColor = "#FFD700"
             fontTextColor = "#FFA500"
+            aGoTopBorderColor = "#FFD700"
+            aGoTopBgR = 254
+            aGoTopBgG = 249
+            aGoTopBgB = 194
         }
 
         val pattern = """
@@ -46,6 +54,10 @@ object PageUtil {
             --a-hover-color:$aLinkColor;
             --a-active-color:$aLinkColor;
             --font-text-color:$fontTextColor;
+            --a-go-top-border-color:$aGoTopBorderColor;
+            --a-go-top-bg-color-r:$aGoTopBgR;
+            --a-go-top-bg-color-g:$aGoTopBgG;
+            --a-go-top-bg-color-b:$aGoTopBgB;
         }
         
         .text-color {
@@ -85,7 +97,18 @@ object PageUtil {
           color:var(--a-visited-color);
           background-color:transparent;
           text-decoration:none;
-        }             
+        }        
+        .a_go_top {
+          float:left;
+          position:fixed;
+          right:0;
+          bottom:0;
+          border:1px solid var(--a-go-top-border-color);
+          border-radius:6px;
+          padding:5px;
+          margin:16px 16px 36px;      
+          background:rgba(var(--a-go-top-bg-color-r), var(--a-go-top-bg-color-g), var(--a-go-top-bg-color-b), 0.5);
+        }
     """.trimIndent()
 
         try {
@@ -132,12 +155,13 @@ object PageUtil {
         scaledWidth: Int,
         density: Int,
         onProgress: (Int, String) -> Unit,
-    ): Boolean = withContext(Dispatchers.IO) {
+    ): Result<Boolean> = withContext(Dispatchers.IO) {
 
-        val timeSource = TimeSource.Monotonic
-        val mark1 = timeSource.markNow()
 
         try {
+            val timeSource = TimeSource.Monotonic
+            val mark1 = timeSource.markNow()
+
             onProgress(0, "开始适配网页文件...")
 
             val file = MyApp.appContext.filesDir.absolutePath + File.separator + date.toFilePath(
@@ -179,17 +203,16 @@ object PageUtil {
             doc.body().apply {
                 attr("id", "topAnchor")
                 append(contentAppend)
-            }
-            */
+            }*/
             //m2
-            /*contentAppend = """
+            contentAppend = """
                 <div class="a_go_top">
                     <a href="javascript:scrollTo(0,0)"><font size="3">回到顶部</font></a>
                 </div>
             """.trimIndent()
             doc.body().apply {
                 append(contentAppend)
-            }*/
+            }
             onProgress(3, "适配网页文件：完成第3步修改")
 
             //2.3 全局处理
@@ -303,6 +326,15 @@ object PageUtil {
                         //其它在 style 里有 max-width 来设定
                         video.attr("height", "auto")
                     }
+                    video.select("source").forEach { source ->
+                        val src = source.attr("src")
+                        println("source = $src")
+                        if (src.startsWith("//")) {
+                            source.attr("src", "https:$src")
+                        } else if (src.indexOf("//") == -1) {
+                            source.attr("src", "https://$src")
+                        }
+                    }
                 }
             }
             Logger.i(TAG, "完成处理iframe,video")
@@ -314,16 +346,16 @@ object PageUtil {
             File(newFile).writeText(doc.html())
             Logger.i(TAG, "保存网页文件成功")
             onProgress(100, "保存网页文件成功")
+
+            val mark2 = timeSource.markNow()
+            Logger.i(TAG, "处理时长：${mark2 - mark1}")
+
+            return@withContext Result.success(true)
         } catch (e: Exception) {
             Logger.e(TAG, "适配网页文件失败，详情：${e.message}")
-            onProgress(-1, "适配网页文件失败，详情：${e.message ?: "原因不详"}")
-            return@withContext false
+            return@withContext Result.failure(e)
         }
 
-        val mark2 = timeSource.markNow()
-        Logger.i(TAG, "处理时长：${mark2 - mark1}")
-
-        return@withContext true
     }
 
     /**
