@@ -11,7 +11,7 @@ object FileUtil {
     suspend fun clearFiles(
         files: List<File>,
         onProgress: ((Int, String) -> Unit)? = null
-    ): String = withContext(Dispatchers.IO) {
+    ): Result<Boolean> = withContext(Dispatchers.IO) {
         onProgress?.invoke(0, "开始清理历史存档...")
         var index = 0
         try {
@@ -21,11 +21,11 @@ object FileUtil {
                 onProgress?.invoke(index * 100 / files.size, "正在清理历史存档...")
             }
             onProgress?.invoke(100, "成功清理历史存档")
-            return@withContext ""
+            return@withContext Result.success(true)
         } catch (e: Exception) {
             Logger.e(TAG, "clearFiles error: ${e.message}")
             onProgress?.invoke(-1, "清理历史存档失败，详情${e.message ?: "失败原因不详"}")
-            return@withContext e.message ?: "失败原因不详"
+            return@withContext Result.failure(e)
         }
     }
 
