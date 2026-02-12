@@ -271,7 +271,7 @@ object PageUtil {
                                 totalImgWidth += width
                             }
                         } else {
-                            if (imgs.size > 1) {
+                            if (imgs.isNotEmpty()) {
                                 img.attr("width", "${maxWidth / imgs.size}")
                                 img.attr("height", "auto")
                                 totalImgWidth += maxWidth / imgs.size
@@ -419,3 +419,4 @@ object PageUtil {
     }
 
 }
+
