@@ -115,7 +115,7 @@ object HttpUtil {
             // 准备文件路径
             val fileLength = connection.contentLength
             val fileName = File(urlString).name//"download_${System.currentTimeMillis()}.dat"
-            val file = File(context.cacheDir, fileName)
+            val file = File(context.filesDir, fileName)
             Logger.i(TAG, "fileName = $fileName, fileLength = $fileLength")
 
             // 流操作
@@ -152,3 +152,4 @@ object HttpUtil {
 
 
 }
+
