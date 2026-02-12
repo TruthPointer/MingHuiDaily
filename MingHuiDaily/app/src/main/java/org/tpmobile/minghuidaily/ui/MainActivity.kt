@@ -738,10 +738,7 @@ class MainActivity : AppCompatActivity() {
                 //setNegativeButton(R.string.dialog_result_cancel, listenerCancel)
             }
 
-            taskDialog = builder.show().apply {
-                getButton(DialogInterface.BUTTON_POSITIVE)?.isAllCaps = false
-                getButton(DialogInterface.BUTTON_NEGATIVE)?.isAllCaps = false
-            }
+            taskDialog = builder.show()
             taskDialog?.setCanceledOnTouchOutside(false)
         }
 
@@ -802,7 +799,6 @@ class MainActivity : AppCompatActivity() {
                 }).fold(
                 onSuccess = { path ->
                     Logger.i("成功下载")
-                    context.toast("下载成功")
                     filePath = path
                 },
                 onFailure = { e ->
@@ -1262,3 +1258,4 @@ class MainActivity : AppCompatActivity() {
     }
 
 }
+
