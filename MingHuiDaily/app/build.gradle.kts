@@ -27,6 +27,7 @@ android {
         debug {
             resValue("string", "app_name", "MHDaily")
             buildConfigField("boolean", "MY_DEBUG", "true")
+            applicationIdSuffix = ".debug"
         }
         release {
             resValue("string", "app_name", "明慧新闻")
