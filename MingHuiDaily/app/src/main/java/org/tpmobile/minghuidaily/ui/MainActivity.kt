@@ -123,16 +123,16 @@ class MainActivity : AppCompatActivity() {
         initViewModel()
         createPageCss()
 
-        checkAndLoadMyUrl(selectedDate)
+        initialCheck(selectedDate)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
-        if (MyApp.Companion.currentNightMode == AppCompatDelegate.MODE_NIGHT_YES)
+        if (MyApp.currentNightMode == AppCompatDelegate.MODE_NIGHT_YES)
             menu.findItem(R.id.action_theme_night).isChecked = true
         else
             menu.findItem(R.id.action_theme_light).isChecked = true
-        if (MyApp.Companion.proxyPort == PROXY_PORT_FREEGATE)
+        if (MyApp.proxyPort == PROXY_PORT_FREEGATE)
             menu.findItem(R.id.action_proxy_freegate).isChecked = true
         else
             menu.findItem(R.id.action_proxy_wujie).isChecked = true
@@ -180,14 +180,14 @@ class MainActivity : AppCompatActivity() {
             R.id.action_proxy_freegate -> {
                 MyApp.USE_PROXY = true
                 item.isChecked = !item.isChecked
-                MyApp.Companion.setProxy(PROXY_PORT_FREEGATE)
+                MyApp.setProxy(PROXY_PORT_FREEGATE)
                 true
             }
 
             R.id.action_proxy_wujie -> {
                 MyApp.USE_PROXY = true
                 item.isChecked = !item.isChecked
-                MyApp.Companion.setProxy(PROXY_PORT_WUJIE)
+                MyApp.setProxy(PROXY_PORT_WUJIE)
                 true
             }
 
@@ -268,7 +268,7 @@ class MainActivity : AppCompatActivity() {
 
     /////////////////////////////////////
     fun switchNightMode(nightModState: Int) {
-        MyApp.Companion.currentNightMode = nightModState
+        MyApp.currentNightMode = nightModState
         delegate.localNightMode = nightModState
         setPref(PREF_THEME_NIGHT, nightModState)
         //修改网页模式
@@ -384,7 +384,7 @@ class MainActivity : AppCompatActivity() {
                 //Logger.i("PROGRESS", "$newProgress")
                 dispatchProgressInfo(
                     taskIndex,
-                    TaskInfo.Companion.TASK_NAME_LOAD_URL,
+                    TaskInfo.TASK_NAME_LOAD_URL,
                     newProgress,
                     ""
                 )
@@ -447,7 +447,7 @@ class MainActivity : AppCompatActivity() {
 
     fun initViewModel() {
         viewModel.getProgress().observe(this) { taskInfo ->
-            if (taskInfo.taskName == TaskInfo.Companion.TASK_NAME_LOAD_URL) {
+            if (taskInfo.taskName == TaskInfo.TASK_NAME_LOAD_URL) {
                 val showTvAdditionalInfo = taskDialog?.isShowing == true && isLargeHtmlFile
                 Logger.i(TAG, "tvAdditionalInfo可见情况：$showTvAdditionalInfo")
                 tvAdditionalInfo?.visibility =
@@ -792,7 +792,7 @@ class MainActivity : AppCompatActivity() {
                 onProgress = { progress, info ->
                     dispatchProgressInfo(
                         taskIndex,
-                        TaskInfo.Companion.TASK_NAME_DOWNLOAD,
+                        TaskInfo.TASK_NAME_DOWNLOAD,
                         progress,
                         info
                     )
@@ -803,11 +803,13 @@ class MainActivity : AppCompatActivity() {
                 },
                 onFailure = { e ->
                     Logger.e("下载出错了，详情：${e.message}")
+                    val info = if(e.message?.contains("404") == true)
+                        "${DateUtils.date2String(date, DateUtils.SDF_DATE_ONLY_CN_SIMPLE)}的文件未找到或尚未发布。" else e.message ?: "原因不详"
                     dispatchProgressInfo(
                         taskIndex,
-                        TaskInfo.Companion.TASK_NAME_DOWNLOAD,
+                        TaskInfo.TASK_NAME_DOWNLOAD,
                         -1,
-                        e.message ?: "原因不详"
+                        info
                     )
                     delay(1000)
                     closeTaskDialog()
@@ -826,7 +828,7 @@ class MainActivity : AppCompatActivity() {
                 onProgress = { progress, info ->
                     dispatchProgressInfo(
                         taskIndex,
-                        TaskInfo.Companion.TASK_NAME_UNZIP,
+                        TaskInfo.TASK_NAME_UNZIP,
                         progress,
                         info
                     )
@@ -839,7 +841,7 @@ class MainActivity : AppCompatActivity() {
                     Logger.e(TAG, "解压出错了")
                     dispatchProgressInfo(
                         taskIndex,
-                        TaskInfo.Companion.TASK_NAME_UNZIP,
+                        TaskInfo.TASK_NAME_UNZIP,
                         -1,
                         e.message ?: "原因不详"
                     )
@@ -863,7 +865,7 @@ class MainActivity : AppCompatActivity() {
                 onProgress = { progress, info ->
                     dispatchProgressInfo(
                         taskIndex,
-                        TaskInfo.Companion.TASK_NAME_MODIFY_HTML_FILE,
+                        TaskInfo.TASK_NAME_MODIFY_HTML_FILE,
                         progress,
                         info
                     )
@@ -876,7 +878,7 @@ class MainActivity : AppCompatActivity() {
                     Logger.e(TAG, "处理文件出错了,详情：${e.message}")
                     dispatchProgressInfo(
                         taskIndex,
-                        TaskInfo.Companion.TASK_NAME_MODIFY_HTML_FILE,
+                        TaskInfo.TASK_NAME_MODIFY_HTML_FILE,
                         -1,
                         e.message ?: "原因不详"
                     )
@@ -907,7 +909,7 @@ class MainActivity : AppCompatActivity() {
             dispatchProgressInfo(taskIndex, taskName, 0, "开始修改样式文件...")
             val taskInfo = PageUtil.generateStyleCss(
                 100 + fontZoomScale,
-                MyApp.Companion.currentNightMode == AppCompatDelegate.MODE_NIGHT_YES
+                MyApp.currentNightMode == AppCompatDelegate.MODE_NIGHT_YES
             )
             if (taskInfo.isError) {
                 dispatchProgressInfo(
@@ -943,14 +945,14 @@ class MainActivity : AppCompatActivity() {
             taskIndex++
             dispatchProgressInfo(
                 taskIndex,
-                TaskInfo.Companion.TASK_NAME_CLEAN_HISTORY,
+                TaskInfo.TASK_NAME_CLEAN_HISTORY,
                 0,
                 "开始清理存档..."
             )
             FileUtil.clearFiles(list) { progress, info ->
                 dispatchProgressInfo(
                     taskIndex,
-                    TaskInfo.Companion.TASK_NAME_CLEAN_HISTORY,
+                    TaskInfo.TASK_NAME_CLEAN_HISTORY,
                     progress,
                     info
                 )
@@ -959,7 +961,7 @@ class MainActivity : AppCompatActivity() {
                 onFailure = { e ->
                     dispatchProgressInfo(
                         taskIndex,
-                        TaskInfo.Companion.TASK_NAME_CLEAN_HISTORY,
+                        TaskInfo.TASK_NAME_CLEAN_HISTORY,
                         -1,
                         e.message ?: "原因不详"
                     )
@@ -969,7 +971,7 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread { toast(R.string.info_clear_history_ok) }
             dispatchProgressInfo(
                 taskIndex,
-                TaskInfo.Companion.TASK_NAME_CLEAN_HISTORY,
+                TaskInfo.TASK_NAME_CLEAN_HISTORY,
                 100,
                 "完成清理存档"
             )
@@ -1108,6 +1110,67 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun initialCheck(date: Date = Date()){
+        Logger.i(TAG, "initialCheck...")
+        showTaskRunningDialog(
+            selectedDate,
+            zipWithPic
+        ) { date, withPic ->
+            lifecycleScope.launch(Dispatchers.IO) {
+                taskIndex = 0
+                taskHistory = ""
+
+                //1.检查夜间模式，修改css style
+                if(delegate.localNightMode != MyApp.currentNightMode){
+                    runOnUiThread {
+                        delegate.localNightMode = MyApp.currentNightMode
+                    }
+                    //修改网页模式
+                    taskIndex++
+                    dispatchProgressInfo(taskIndex, TaskInfo.TASK_NAME_MODIFY_CSS_FILE, 0, "开始修改样式文件...")
+                    val taskInfo = PageUtil.generateStyleCss(
+                        100 + fontZoomScale,
+                        MyApp.currentNightMode == AppCompatDelegate.MODE_NIGHT_YES
+                    )
+                    if (taskInfo.isError) {
+                        dispatchProgressInfo(
+                            taskIndex,
+                            TaskInfo.TASK_NAME_MODIFY_CSS_FILE,
+                            -1,
+                            taskInfo.errorInfo
+                        )
+                        return@launch
+                    }
+                    dispatchProgressInfo(taskIndex, TaskInfo.TASK_NAME_MODIFY_CSS_FILE, 100, "修改样式文件成功")
+                }
+
+                //2.检查归档情况
+                var newWithPicState: Boolean
+                val fileNewWithPic =
+                    File(filesDir.absolutePath + File.separator + date.toFilePath(true, false))
+                val fileNewWithoutPic =
+                    File(filesDir.absolutePath + File.separator + date.toFilePath(false, false))
+                if (!fileNewWithPic.exists() && !fileNewWithoutPic.exists()) {
+                    runOnUiThread {
+                        showCalendarDialog()
+                    }
+                    return@launch
+                } else if (fileNewWithPic.exists() || !fileNewWithoutPic.exists()) {
+                    newWithPicState = true
+                } else if (!fileNewWithPic.exists() || fileNewWithoutPic.exists()) {
+                    newWithPicState = false
+                } else {
+                    newWithPicState = true
+                }
+
+                launch(Dispatchers.Main) {
+                    isLargeHtmlFile = false
+                    loadMyUrl(PageUtil.getBaseUrl(date, newWithPicState))
+                }
+            }
+        }
+    }
+
     private fun checkAndLoadMyUrl(date: Date = Date()) {
         //检查当前日期的修改后文件 2026-5-13-t-new.html 是否存在，不存在则显示日期选择对话框，因至少整个任务流程没完成
 
@@ -1168,7 +1231,7 @@ class MainActivity : AppCompatActivity() {
         HttpUtil.setProxyForWebView()
 
         taskIndex++
-        dispatchProgressInfo(taskIndex, TaskInfo.Companion.TASK_NAME_LOAD_URL, 0, "开始加载网页...")
+        dispatchProgressInfo(taskIndex, TaskInfo.TASK_NAME_LOAD_URL, 0, "开始加载网页...")
         val basePath = "${filesDir.absolutePath}/$filePath/"
         val file = "$basePath$filePath-new.html"//"$filePath-short.html"
         isLargeHtmlFile = File(file).length() >= MAX_FILE_SIZE_FOR_TIP
@@ -1193,7 +1256,7 @@ class MainActivity : AppCompatActivity() {
                 return@launch
             PageUtil.generateStyleCss(
                 100 + fontZoomScale,
-                MyApp.Companion.currentNightMode == AppCompatDelegate.MODE_NIGHT_YES
+                MyApp.currentNightMode == AppCompatDelegate.MODE_NIGHT_YES
             )
             Logger.i(TAG, "createPageCss: OK...")
             //2.
@@ -1211,7 +1274,7 @@ class MainActivity : AppCompatActivity() {
             selectedDate,
             zipWithPic
         ) { date, withPic ->
-            runTasksForWebViewReload(TaskInfo.Companion.TASK_NAME_MODIFY_CSS_FILE)
+            runTasksForWebViewReload(TaskInfo.TASK_NAME_MODIFY_CSS_FILE)
         }
     }
 
@@ -1258,4 +1321,3 @@ class MainActivity : AppCompatActivity() {
     }
 
 }
-
