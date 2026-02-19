@@ -51,6 +51,7 @@ import java.util.Locale
 object DateUtils {
 
     val SDF_DATE_ONLY_CN = SimpleDateFormat("yyyy年MM月dd日", Locale.US)
+    val SDF_DATE_ONLY_CN_SIMPLE = SimpleDateFormat("yyyy年M月d日", Locale.US)
     val SDF_DATE_FOR_HISTORY = SimpleDateFormat("yyyy年MM月dd", Locale.US)
     val SDF_DATE_ONLY_EN = SimpleDateFormat("yyyy-M-d", Locale.US)
     val SDF_URL_LINK = SimpleDateFormat("yyyy/M/d/", Locale.US)
@@ -171,3 +172,4 @@ object DateUtils {
     }
 
 }
+
