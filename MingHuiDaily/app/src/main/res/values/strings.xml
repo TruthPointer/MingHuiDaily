@@ -1,8 +1,8 @@
 <resources>
     <!--<string name="app_name">明慧新闻</string>-->
     <string name="app_name_cn">明慧新闻</string>
-    <string name="version_name" translatable="false">V1.2.20260219</string>
-    <string name="dialog_title_about">明慧新闻 V1.2.20260219</string>
+    <string name="version_name" translatable="false">V1.3.20260220</string>
+    <string name="dialog_title_about">明慧新闻 V1.3.20260220</string>
      <!-- 明慧新闻 -->
     <string name="title_activity_fullscreen">图片展示</string>
 
