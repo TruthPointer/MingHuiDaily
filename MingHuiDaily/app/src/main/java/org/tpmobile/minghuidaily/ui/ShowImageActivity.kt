@@ -14,6 +14,7 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.ImageViewState
+import org.tpmobile.minghuidaily.MyApp
 import org.tpmobile.minghuidaily.R
 import org.tpmobile.minghuidaily.databinding.ActivityShowImageBinding
 import org.tpmobile.minghuidaily.util.Logger
@@ -82,6 +83,9 @@ class ShowImageActivity : AppCompatActivity() {
     }
 
     private fun initView() {
+        if(delegate.localNightMode != MyApp.currentNightMode) {
+            delegate.localNightMode = MyApp.currentNightMode
+        }
         binding.zivWebImage.maxScale = 10.0f
         binding.zivWebImage.minScale = 0.1f
         //binding.pbLoadingImage.setProgressColor(R.color.color_6200EE)
