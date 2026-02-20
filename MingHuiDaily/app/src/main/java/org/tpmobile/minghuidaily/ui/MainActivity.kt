@@ -1239,7 +1239,7 @@ class MainActivity : AppCompatActivity() {
         Logger.i("WebView", "path = $file, ${if (isLargeHtmlFile) "较大文件" else ""}")
         val htmlString = File(file).readText()
 
-        binding.webView.loadUrl(file)
+        binding.webView.loadUrl("file://$file")
 
         //20260211 取消，此会导致跳转问题
         /*binding.webView.loadDataWithBaseURL(
@@ -1321,3 +1321,4 @@ class MainActivity : AppCompatActivity() {
     }
 
 }
+
