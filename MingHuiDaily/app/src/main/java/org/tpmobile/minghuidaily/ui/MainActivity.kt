@@ -993,11 +993,15 @@ class MainActivity : AppCompatActivity() {
                     taskHistory += succInfo
             }
             val taskInfo = if (progress == -2)
-                info
+                "$taskHistory$taskIndex.${info}"
             else if (progress == -1)
                 ""
-            else
-                "$taskHistory$taskIndex.${if (showDetailInfo) info else "正在${taskName}中..."}"//！！！暂未将传递过来的正常运行信息显示
+            else {
+                if(taskName != TaskInfo.TASK_NAME_DOWNLOAD)
+                    "$taskHistory$taskIndex.${if (showDetailInfo) info else "正在${taskName}中..."}"//！！！暂未将传递过来的正常运行信息显示
+                else
+                    "$taskHistory$taskIndex.${info}"
+            }
             viewModel.setProgress(
                 TaskInfo(
                     taskName,
@@ -1321,4 +1325,3 @@ class MainActivity : AppCompatActivity() {
     }
 
 }
-
