@@ -137,9 +137,8 @@ object PageUtil {
 
     /**
      * @param date 如：2026-1-1
-     * @param zipFilePath 实际为 cacheFile 的路径，即下载和存放zip文件的目录
+     * @param withPic 压缩文件类型：有图片、无图片
      * @param scaledWidth 屏幕宽度的90%
-     * @param zoomScale 放大倍数，如：120%
      * @param density 屏幕密度的100倍，如 屏幕密度位3.0，此数则为 300
      * @param withPic 处理 带图片的每日文章
      *
@@ -234,9 +233,10 @@ object PageUtil {
 
             //2.4 处理 table 里的图片 width
             var imgs: Elements
-            var totalImgWidth = 0
-            var imgWidth = 0
-            var imgHeight = 0
+            var tds: Elements
+            var totalImgWidth: Int
+            var imgWidth: Int
+            var imgHeight: Int
             val tables = doc.select("table")
             val tableSize = tables.size
             Logger.i(TAG, "tables.size: ${tables.size}")
@@ -244,8 +244,9 @@ object PageUtil {
                 //调整img宽度，有两种情况，attr 有width，或者其 style里有width
                 table.select("tr").forEach { tr ->
                     totalImgWidth = 0
+                    tds = tr.select("td")
                     imgs = tr.select("img")
-                    var imgRatio = 0f
+                    var imgRatio: Float
                     imgs.forEach { img ->
                         img.removeAttr("style")
 
@@ -256,25 +257,25 @@ object PageUtil {
                         if (width > 0 && height > 0) {
                             imgRatio = height.toFloat() / width.toFloat()
                             if (imgWidth > scaledWidth) {
-                                img.attr("width", "${maxWidth / imgs.size}")
-                                img.attr("height", "${maxWidth / imgs.size * imgRatio}")
-                                totalImgWidth += maxWidth / imgs.size
+                                img.attr("width", "${maxWidth / tds.size}")
+                                img.attr("height", "${maxWidth / tds.size * imgRatio}")
+                                totalImgWidth += maxWidth / tds.size
                             } else {
                                 totalImgWidth += width
                             }
                         } else if (width > 0 && height == 0) {
                             if (imgWidth > scaledWidth) {
-                                img.attr("width", "${maxWidth / imgs.size}")
+                                img.attr("width", "${maxWidth / tds.size}")
                                 img.attr("height", "auto")
-                                totalImgWidth += maxWidth / imgs.size
+                                totalImgWidth += maxWidth / tds.size
                             } else {
                                 totalImgWidth += width
                             }
                         } else {
                             if (imgs.isNotEmpty()) {
-                                img.attr("width", "${maxWidth / imgs.size}")
+                                img.attr("width", "${maxWidth / tds.size}")
                                 img.attr("height", "auto")
-                                totalImgWidth += maxWidth / imgs.size
+                                totalImgWidth += maxWidth / tds.size
                             }
                             //其它在 style 里有 max-width 来设定
                         }
@@ -304,8 +305,8 @@ object PageUtil {
             //2.5 处理iframe,video
             val tags = listOf("iframe", "video")
             tags.forEach { tag ->
-                var videoWidth = 0f
-                var videoRatio = 0f
+                var videoWidth: Float
+                var videoRatio: Float
                 doc.select(tag).forEach { video ->
                     val width = video.attr("width").toIntOrNull() ?: 0
                     val height = video.attr("height").toIntOrNull() ?: 0
@@ -419,4 +420,3 @@ object PageUtil {
     }
 
 }
-
