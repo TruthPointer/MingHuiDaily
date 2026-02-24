@@ -39,6 +39,6 @@
             android:label="@string/title_activity_fullscreen"
             android:theme="@style/Theme.MingHuiDaily.Fullscreen" />
     </application>
-
-
+    
 </manifest>
+
