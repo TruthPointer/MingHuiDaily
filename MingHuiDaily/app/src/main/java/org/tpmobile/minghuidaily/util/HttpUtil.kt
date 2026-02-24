@@ -17,7 +17,7 @@ import java.net.URL
 import java.util.Date
 
 object HttpUtil {
-    private val TAG = "HttpUtil"
+    private const val TAG = "HttpUtil"
 
     /////////////////////////////////////
     //For WebView
@@ -30,13 +30,13 @@ object HttpUtil {
     ) {
         if (!MyApp.USE_PROXY) return
         if (WebViewFeature.isFeatureSupported(WebViewFeature.PROXY_OVERRIDE)) {
-            Logger.i("[NET]", "可以设置代理……");
+            Logger.i("[NET]", "可以设置代理……")
             val proxyConfig = ProxyConfig.Builder()
                 .addProxyRule("http://$proxyHost:$proxyPort")
                 .addProxyRule("https://$proxyHost:$proxyPort")
                 .addProxyRule("socks://$proxyHost:$proxyPort")
                 //.addDirect() //直连
-                .build();
+                .build()
             /*网站直连
             这种方式是应用内的 WebView 全局代理，如果需要绕过某些网站，可以指定，或者使用通配符进行绕过:
             val proxyConfig = ProxyConfig.Builder()
@@ -48,37 +48,17 @@ object HttpUtil {
             ProxyController.getInstance().setProxyOverride(
                 proxyConfig, { executor ->
                     {
-                        //Logger.i("[NET]", "代理设置完成");
+                        //Logger.i("[NET]", "代理设置完成")
                     }
                 },
                 {
-                    Logger.i("[NET]", "WebView代理已设置");
+                    Logger.i("[NET]", "WebView代理已设置")
                 })
 
         }
-    }
-
-    fun clearProxyForWebView() {
-        if (WebViewFeature.isFeatureSupported(WebViewFeature.PROXY_OVERRIDE)) {
-            Logger.i("[NET]", "可以取消代理……")
-            ProxyController.getInstance().clearProxyOverride(
-                { executor ->
-                    {
-                        //Logger.i("[NET]", "代理取消完成");
-                    }
-                },
-                {
-                    Logger.i("[NET]", "WebView代理已取消");
-                })
-        }
-    }
-
-    fun clearWebViewCache() {
-
     }
 
     //////////////////////////
-
     /**
      * https://m.minghui.org/mh/articles/2026/1/19/2026-1-19.zip
      * https://m.minghui.org/mh/articles/2026/1/19/2026-1-19-t.zip
@@ -133,7 +113,7 @@ object HttpUtil {
                         if (fileLength > 0) {
                             val progress = (total * 100 / fileLength).toInt()
                             val detail =
-                                "${total.toHumanReadableSize()}/${fileLength.toHumanReadableSize()}"
+                                "正在下载[${total.toHumanReadableSize()}/${fileLength.toHumanReadableSize()}]中..."
                             onProgress?.invoke(progress, detail)
                         } else {
                             // 如果服务器没返回长度，只显示已下载大小
@@ -150,6 +130,4 @@ object HttpUtil {
         }
     }
 
-
 }
-
