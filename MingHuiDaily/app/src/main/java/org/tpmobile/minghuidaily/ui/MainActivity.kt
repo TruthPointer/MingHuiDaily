@@ -581,10 +581,7 @@ class MainActivity : AppCompatActivity() {
             setPositiveButton(R.string.dialog_result_ok, listenerOk)
             setNegativeButton(R.string.dialog_result_cancel, listenerCancel)
             //setCancelable(false)
-            with(show()) {
-                getButton(DialogInterface.BUTTON_POSITIVE)?.isAllCaps = false
-                getButton(DialogInterface.BUTTON_NEGATIVE)?.isAllCaps = false
-            }
+            show()
         }
     }
 
@@ -693,12 +690,32 @@ class MainActivity : AppCompatActivity() {
             checkAndLoadMyUrl(date)
         }
         val listenerNegative = DialogInterface.OnClickListener { _, _ -> }
-
+        val listenerNeutral = DialogInterface.OnClickListener { _, _ ->
+            val list = adapter.getAllSelectedItem()
+            if (list.isEmpty()) {
+                toast(R.string.info_please_select_one_date)
+                return@OnClickListener
+            }
+            //1.
+            Logger.i(TAG, "所选择日期：$list[0]")
+            val date = DateUtils.parse(list[0], DateUtils.SDF_DATE_FOR_HISTORY)
+            if (date == null) {
+                toast(R.string.error_date_format)
+                return@OnClickListener
+            }
+            //2.
+            //selectedDate = date
+            //dateString = DateUtils.date2String(selectedDate).trim()
+            //setPref(PREF_CURRENT_BROWSING_DATE, dateString)
+            //3.
+            modifyHtmlAndLoadMyUrl(date)
+        }
         AlertDialog.Builder(this).apply {
             setTitle(R.string.dialog_browse_history)
             setView(view)
             setPositiveButton(R.string.dialog_button_browse_history, listenerPositive)
             setNegativeButton(R.string.dialog_result_cancel, listenerNegative)
+            setNeutralButton(R.string.dialog_button_renew_html, listenerNeutral)
             //setCancelable(false)
             show()
         }
@@ -747,7 +764,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showAboutDialog() {
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_app_target, null)
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_app_hope, null)
         val listenerPositive = DialogInterface.OnClickListener { _, _ -> }
         AlertDialog.Builder(this).apply {
             setTitle(R.string.dialog_title_about)
@@ -803,8 +820,13 @@ class MainActivity : AppCompatActivity() {
                 },
                 onFailure = { e ->
                     Logger.e("下载出错了，详情：${e.message}")
-                    val info = if(e.message?.contains("404") == true)
-                        "${DateUtils.date2String(date, DateUtils.SDF_DATE_ONLY_CN_SIMPLE)}的文件未找到或尚未发布。" else e.message ?: "原因不详"
+                    val info = if (e.message?.contains("404") == true)
+                        "${
+                            DateUtils.date2String(
+                                date,
+                                DateUtils.SDF_DATE_ONLY_CN_SIMPLE
+                            )
+                        }的文件未找到或尚未发布。" else e.message ?: "原因不详"
                     dispatchProgressInfo(
                         taskIndex,
                         TaskInfo.TASK_NAME_DOWNLOAD,
@@ -997,7 +1019,7 @@ class MainActivity : AppCompatActivity() {
             else if (progress == -1)
                 ""
             else {
-                if(taskName != TaskInfo.TASK_NAME_DOWNLOAD)
+                if (taskName != TaskInfo.TASK_NAME_DOWNLOAD)
                     "$taskHistory$taskIndex.${if (showDetailInfo) info else "正在${taskName}中..."}"//！！！暂未将传递过来的正常运行信息显示
                 else
                     "$taskHistory$taskIndex.${info}"
@@ -1114,7 +1136,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun initialCheck(date: Date = Date()){
+    private fun initialCheck(date: Date = Date()) {
         Logger.i(TAG, "initialCheck...")
         showTaskRunningDialog(
             selectedDate,
@@ -1125,13 +1147,18 @@ class MainActivity : AppCompatActivity() {
                 taskHistory = ""
 
                 //1.检查夜间模式，修改css style
-                if(delegate.localNightMode != MyApp.currentNightMode){
+                if (delegate.localNightMode != MyApp.currentNightMode) {
                     runOnUiThread {
                         delegate.localNightMode = MyApp.currentNightMode
                     }
                     //修改网页模式
                     taskIndex++
-                    dispatchProgressInfo(taskIndex, TaskInfo.TASK_NAME_MODIFY_CSS_FILE, 0, "开始修改样式文件...")
+                    dispatchProgressInfo(
+                        taskIndex,
+                        TaskInfo.TASK_NAME_MODIFY_CSS_FILE,
+                        0,
+                        "开始修改样式文件..."
+                    )
                     val taskInfo = PageUtil.generateStyleCss(
                         100 + fontZoomScale,
                         MyApp.currentNightMode == AppCompatDelegate.MODE_NIGHT_YES
@@ -1145,7 +1172,12 @@ class MainActivity : AppCompatActivity() {
                         )
                         return@launch
                     }
-                    dispatchProgressInfo(taskIndex, TaskInfo.TASK_NAME_MODIFY_CSS_FILE, 100, "修改样式文件成功")
+                    dispatchProgressInfo(
+                        taskIndex,
+                        TaskInfo.TASK_NAME_MODIFY_CSS_FILE,
+                        100,
+                        "修改样式文件成功"
+                    )
                 }
 
                 //2.检查归档情况
@@ -1169,6 +1201,84 @@ class MainActivity : AppCompatActivity() {
 
                 launch(Dispatchers.Main) {
                     isLargeHtmlFile = false
+                    loadMyUrl(PageUtil.getBaseUrl(date, newWithPicState))
+                }
+            }
+        }
+    }
+
+    private fun modifyHtmlAndLoadMyUrl(date: Date = Date()) {
+        showTaskRunningDialog(
+            date,
+            zipWithPic
+        ) { date, _ ->
+            taskJob = lifecycleScope.launch(Dispatchers.IO) {
+                taskIndex = 0
+                taskHistory = ""
+                isLargeHtmlFile = false
+
+                //1.
+                val list = mutableListOf<Boolean>()
+                var newWithPicState: Boolean
+                val fileNewWithPic =
+                    File(filesDir.absolutePath + File.separator + date.toFilePath(true, false))
+                val fileNewWithoutPic =
+                    File(filesDir.absolutePath + File.separator + date.toFilePath(false, false))
+                if (!fileNewWithPic.exists() && !fileNewWithoutPic.exists()) {
+                    toast("所选日期的归档不存在！")
+                    return@launch
+                } else if (fileNewWithPic.exists() || !fileNewWithoutPic.exists()) {
+                    list.add(true)
+                    newWithPicState = true
+                } else if (!fileNewWithPic.exists() || fileNewWithoutPic.exists()) {
+                    list.add(false)
+                    newWithPicState = false
+                } else {
+                    list.add(true)
+                    list.add(false)
+                    newWithPicState = true
+                }
+                Logger.i(TAG, "要从新适配的：$list")
+                //2.
+                if (!isActive) return@launch
+                list.forEach { withPic ->
+                    taskIndex++
+                    PageUtil.modifyHtml(
+                        date,
+                        withPic,
+                        resources.displayMetrics.widthPixels * 9 / 10,
+                        (resources.displayMetrics.density * 100).toInt(),
+                        onProgress = { progress, info ->
+                            dispatchProgressInfo(
+                                taskIndex,
+                                TaskInfo.TASK_NAME_MODIFY_HTML_FILE,
+                                progress,
+                                info
+                            )
+                        }
+                    ).fold(
+                        onSuccess = {
+                            Logger.e(TAG, "完成文件处理")
+                        },
+                        onFailure = { e ->
+                            Logger.e(TAG, "处理文件出错了,详情：${e.message}")
+                            dispatchProgressInfo(
+                                taskIndex,
+                                TaskInfo.TASK_NAME_MODIFY_HTML_FILE,
+                                -1,
+                                e.message ?: "原因不详"
+                            )
+                            delay(1000)
+                            closeTaskDialog()
+                            return@launch
+                        }
+                    )
+                }
+
+                //3.loadUrl
+                if (!isActive) return@launch
+                //taskIndex++ loadMyUrl自动++
+                launch(Dispatchers.Main) {
                     loadMyUrl(PageUtil.getBaseUrl(date, newWithPicState))
                 }
             }
