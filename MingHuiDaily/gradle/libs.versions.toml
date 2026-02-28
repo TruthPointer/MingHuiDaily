@@ -13,7 +13,7 @@ navigationUiKtx = "2.6.0"
 subsamplingScaleImageView = "3.10.0"
 webkit = "1.15.0"
 preferenceKtx = "1.2.1"
-zip4j = "2.11.5"
+zip4j = "2.11.6"
 jsoup = "1.22.1"
 volley = "1.2.1"
 recyclerview = "1.4.0"
@@ -40,4 +40,3 @@ volley = { group = "com.android.volley", name = "volley", version.ref = "volley"
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-parcelize = { id = "kotlin-parcelize" }
-
