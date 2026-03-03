@@ -1,9 +1,7 @@
 package org.tpmobile.minghuidaily.util
 
-import android.app.UiModeManager
 import android.content.Context
 import android.util.DisplayMetrics
-import androidx.appcompat.app.AppCompatDelegate
 import org.tpmobile.minghuidaily.MyApp
 
 
@@ -58,3 +56,4 @@ object DisplayUtil {
     /////////////////
 
 }
+
