@@ -9,8 +9,7 @@ object FileUtil {
     private val TAG = "FileUtil"
 
     suspend fun clearFiles(
-        files: List<File>,
-        onProgress: ((Int, String) -> Unit)? = null
+        files: List<File>, onProgress: ((Int, String) -> Unit)? = null
     ): Result<Boolean> = withContext(Dispatchers.IO) {
         onProgress?.invoke(0, "开始清理历史存档...")
         var index = 0
@@ -24,7 +23,6 @@ object FileUtil {
             return@withContext Result.success(true)
         } catch (e: Exception) {
             Logger.e(TAG, "clearFiles error: ${e.message}")
-            onProgress?.invoke(-1, "清理历史存档失败，详情${e.message ?: "失败原因不详"}")
             return@withContext Result.failure(e)
         }
     }
