@@ -40,7 +40,6 @@ import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.tpmobile.minghuidaily.MyApp
@@ -121,21 +120,18 @@ class MainActivity : AppCompatActivity() {
         dispatchOnBackEvent()
         initView()
         initViewModel()
-        createPageCss()
 
         initialCheck(selectedDate)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
-        if (MyApp.currentNightMode == AppCompatDelegate.MODE_NIGHT_YES)
-            menu.findItem(R.id.action_theme_night).isChecked = true
-        else
-            menu.findItem(R.id.action_theme_light).isChecked = true
-        if (MyApp.proxyPort == PROXY_PORT_FREEGATE)
-            menu.findItem(R.id.action_proxy_freegate).isChecked = true
-        else
-            menu.findItem(R.id.action_proxy_wujie).isChecked = true
+        if (MyApp.currentNightMode == AppCompatDelegate.MODE_NIGHT_YES) menu.findItem(R.id.action_theme_night).isChecked =
+            true
+        else menu.findItem(R.id.action_theme_light).isChecked = true
+        if (MyApp.proxyPort == PROXY_PORT_FREEGATE) menu.findItem(R.id.action_proxy_freegate).isChecked =
+            true
+        else menu.findItem(R.id.action_proxy_wujie).isChecked = true
         return true
     }
 
@@ -171,8 +167,7 @@ class MainActivity : AppCompatActivity() {
                 item.isChecked = !item.isChecked
                 switchNightMode(AppCompatDelegate.MODE_NIGHT_YES)
                 true
-            }
-            /*R.id.action_theme_system -> {
+            }/*R.id.action_theme_system -> {
                 //toast("system theme")
                 switchNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
                 true
@@ -223,8 +218,7 @@ class MainActivity : AppCompatActivity() {
      *             android:exported="true"
      *             android:configChanges="uiMode|"
      *  则和下面的 onConfigurationChanged 配合，自己做切换逻辑
-     */
-    /*override fun onConfigurationChanged(newConfig: Configuration) {
+     *//*override fun onConfigurationChanged(newConfig: Configuration) {
         val currentNightMode = newConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK
         when(currentNightMode){
             Configuration.UI_MODE_NIGHT_NO -> {}
@@ -277,8 +271,7 @@ class MainActivity : AppCompatActivity() {
 
     fun dispatchOnBackEvent() {
         onBackPressedDispatcher.addCallback(
-            this,
-            onBackPressedCallback = object : OnBackPressedCallback(true) {
+            this, onBackPressedCallback = object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     if (inFullScreenState()) {
                         hideFullScreenView()
@@ -308,10 +301,8 @@ class MainActivity : AppCompatActivity() {
         val isWebViewSupportProxyOverrideFeature = HttpUtil.isWebViewSupportProxyOverrideFeature()
         Logger.i(TAG, "SEC=$isWebViewSupportProxyOverrideFeature")
         binding.toolbar.setLogo(
-            if (isWebViewSupportProxyOverrideFeature)
-                R.drawable.mh_daily_logo_sec_ok
-            else
-                R.drawable.mh_daily_logo
+            if (isWebViewSupportProxyOverrideFeature) R.drawable.mh_daily_logo_sec_ok
+            else R.drawable.mh_daily_logo
         )
         supportActionBar?.title = ""
 
@@ -346,17 +337,14 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onReceivedSslError(
-                view: WebView?,
-                handler: SslErrorHandler?,
-                error: SslError?
+                view: WebView?, handler: SslErrorHandler?, error: SslError?
             ) {
                 super.onReceivedSslError(view, handler, error)
                 //handler?.proceed()
             }
 
             override fun shouldOverrideUrlLoading(
-                view: WebView?,
-                request: WebResourceRequest?
+                view: WebView?, request: WebResourceRequest?
             ): Boolean {
                 Logger.i("shouldOverrideUrlLoading", view?.url ?: "***")
                 val url = request?.url?.toString() ?: ""
@@ -383,20 +371,15 @@ class MainActivity : AppCompatActivity() {
                 //super.onProgressChanged(view, newProgress)
                 //Logger.i("PROGRESS", "$newProgress")
                 dispatchProgressInfo(
-                    taskIndex,
-                    TaskInfo.TASK_NAME_LOAD_URL,
-                    newProgress,
-                    ""
+                    taskIndex, TaskInfo.TASK_NAME_LOAD_URL, newProgress, ""
                 )
-                if (newProgress == 100)
-                    closeTaskDialog()
+                if (newProgress == 100) closeTaskDialogOnUi()
             }
 
             override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
                 binding.webView.visibility = View.INVISIBLE
                 Logger.i(
-                    TAG,
-                    "[onShowCustomView] fullScreenView = null ? ${fullScreenView == null}"
+                    TAG, "[onShowCustomView] fullScreenView = null ? ${fullScreenView == null}"
                 )
                 if (fullScreenView != null) {
                     fullScreenViewCallback?.onCustomViewHidden()
@@ -418,8 +401,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onHideCustomView() {
                 Logger.i(
-                    TAG,
-                    "[onHideCustomView] fullScreenView = null ? ${fullScreenView == null}"
+                    TAG, "[onHideCustomView] fullScreenView = null ? ${fullScreenView == null}"
                 )
                 if (fullScreenView == null) return
                 fullScreenViewCallback?.onCustomViewHidden()
@@ -450,12 +432,11 @@ class MainActivity : AppCompatActivity() {
             if (taskInfo.taskName == TaskInfo.TASK_NAME_LOAD_URL) {
                 val showTvAdditionalInfo = taskDialog?.isShowing == true && isLargeHtmlFile
                 Logger.i(TAG, "tvAdditionalInfo可见情况：$showTvAdditionalInfo")
-                tvAdditionalInfo?.visibility =
-                    if (showTvAdditionalInfo) {
-                        View.VISIBLE
-                    } else {
-                        View.GONE
-                    }
+                tvAdditionalInfo?.visibility = if (showTvAdditionalInfo) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
             }
             tvLoadingInfo?.text = taskInfo.taskInfo
             pbLoading?.visibility = if (taskInfo.progress != -2) {
@@ -466,7 +447,7 @@ class MainActivity : AppCompatActivity() {
             pbLoading?.progress = taskInfo.progress
 
             if (taskInfo.isError) {
-                closeTaskDialog()
+                closeTaskDialogOnUi()
                 dialogWith1Btn("错误", "错误详情：${taskInfo.errorInfo}")
             }
         }
@@ -510,15 +491,12 @@ class MainActivity : AppCompatActivity() {
     private fun showCalendarDialog() {
         //1、檢查轉換
         //2、初始化View
-        val view =
-            LayoutInflater.from(this).inflate(R.layout.layout_calendar, null)
+        val view = LayoutInflater.from(this).inflate(R.layout.layout_calendar, null)
         cvTodayNewsCalendar = view.findViewById(R.id.cvTodayNewsCalendar)
         val rgDownloadZipType: RadioGroup = view.findViewById(R.id.rgDownloadZipType)
 
-        if (zipWithPic)
-            rgDownloadZipType.check(R.id.rbWithPic)
-        else
-            rgDownloadZipType.check(R.id.rbWithoutPic)
+        if (zipWithPic) rgDownloadZipType.check(R.id.rbWithPic)
+        else rgDownloadZipType.check(R.id.rbWithoutPic)
         rgDownloadZipType.setOnCheckedChangeListener { group, checkedId ->
             zipWithPic = checkedId == R.id.rbWithPic
             setPref(PREF_ZIP_WITH_PIC, zipWithPic)
@@ -559,21 +537,21 @@ class MainActivity : AppCompatActivity() {
             //2.
             if (test) {
                 showTaskRunningDialog(
-                    DateUtils.parse("2026-1-19")!!,
-                    zipWithPic
+                    DateUtils.parse("2026-1-19")!!, zipWithPic
                 ) { date, withPic ->
                     runTasksForNewsDisplay(this, date, withPic)
                 }
             } else {
                 showTaskRunningDialog(
-                    selectedDate,
-                    zipWithPic
+                    selectedDate, zipWithPic
                 ) { date, withPic ->
                     runTasksForNewsDisplay(this, date, withPic)
                 }
             }
         }
-        val listenerCancel = DialogInterface.OnClickListener { _, _ -> }
+        val listenerCancel = DialogInterface.OnClickListener { _, _ ->
+            closeTaskDialogOnUi()
+        }
         //4、運行
         AlertDialog.Builder(this).apply {
             setView(view)
@@ -588,8 +566,7 @@ class MainActivity : AppCompatActivity() {
     private fun showPicture(url: String) {
         startActivity(
             ShowImageActivity.intentFor(
-                applicationContext,
-                url
+                applicationContext, url
             )
         )
     }
@@ -621,15 +598,14 @@ class MainActivity : AppCompatActivity() {
                 R.string.dialog_tip,
                 R.string.confirmation_about_clean_selected_history,
                 povAction = {
-                    runTasksForCleanHistory(pathsWithoutPic + pathsWithPic)
-                }
-            )
+                    showTaskRunningDialog(selectedDate, true) { _, _ ->
+                        runTasksForCleanHistory(pathsWithoutPic + pathsWithPic)
+                    }
+                })
         }
         val listenerNeutral = DialogInterface.OnClickListener { _, _ ->
-            val list = (filesDir.listFiles()?.filter { it.isDirectory } ?: emptyList())
-                .asSequence()
-                .map { file -> file.name }
-                .distinct()
+            val list = (filesDir.listFiles()?.filter { it.isDirectory } ?: emptyList()).asSequence()
+                .map { file -> file.name }.distinct()
                 .filter { name -> name.matches(Regex("\\d{4}-\\d{1,2}-\\d{1,2}(-t)?")) }
                 .map { name -> File(filesDir, name) }.toList()
             if (list.isEmpty()) {
@@ -637,12 +613,11 @@ class MainActivity : AppCompatActivity() {
                 return@OnClickListener
             }
             dialogWith2Btn(
-                R.string.dialog_tip,
-                R.string.confirmation_about_clean_all_history,
-                povAction = {
-                    runTasksForCleanHistory(list)
-                }
-            )
+                R.string.dialog_tip, R.string.confirmation_about_clean_all_history, povAction = {
+                    showTaskRunningDialog(selectedDate, true) { _, _ ->
+                        runTasksForCleanHistory(list)
+                    }
+                })
         }
         val listenerNegative = DialogInterface.OnClickListener { _, _ -> }
 
@@ -722,16 +697,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showTaskRunningDialog(
-        date: Date,
-        withPic: Boolean,
-        doSomeWork: ((date: Date, withPic: Boolean) -> Unit)? = null
+        date: Date, withPic: Boolean, doSomeWork: ((date: Date, withPic: Boolean) -> Unit)? = null
     ) {
         Logger.i(TAG, "showTaskRunningDialog...${taskDialog == null}, ${taskDialog?.isShowing}")
         //1、对话框
         if (taskDialog == null || taskDialog?.isShowing == false) {
             Logger.i(TAG, "showTaskRunningDialog: isShowing == false")
-            val view =
-                LayoutInflater.from(this).inflate(R.layout.dialog_task_progress, null)
+            val view = LayoutInflater.from(this).inflate(R.layout.dialog_task_progress, null)
             tvLoadingInfo = view.findViewById(R.id.tvLoadingInfo)
             tvAdditionalInfo = view.findViewById(R.id.tvAdditionalInfo)
             pbLoading = view.findViewById(R.id.pbLoading)
@@ -739,12 +711,9 @@ class MainActivity : AppCompatActivity() {
 
             val listenerOk = DialogInterface.OnClickListener { _, _ ->
                 dialogWith2Btn(
-                    R.string.dialog_tip,
-                    R.string.confirmation_about_cancel_tasks,
-                    povAction = {
-                        closeTaskDialog()
-                    }
-                )
+                    R.string.dialog_tip, R.string.confirmation_about_cancel_tasks, povAction = {
+                        closeTaskDialogOnUi()
+                    })
             }
             //val listenerCancel = DialogInterface.OnClickListener { _, _ -> }
 
@@ -776,10 +745,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun runTasksForNewsDisplay(
-        context: Context,
-        date: Date,
-        withPic: Boolean,
-        delZipAfterUnzip: Boolean = true
+        context: Context, date: Date, withPic: Boolean, delZipAfterUnzip: Boolean = true
     ) {
         taskJob = lifecycleScope.launch(Dispatchers.IO) {
             taskIndex = 0
@@ -804,14 +770,9 @@ class MainActivity : AppCompatActivity() {
             val baseUrl = PageUtil.getBaseUrl(date, withPic)
             val url = HttpUtil.getDownloadUrl(date, withPic)
             HttpUtil.downloadFile(
-                context,
-                url,
-                onProgress = { progress, info ->
+                context, url, onProgress = { progress, info ->
                     dispatchProgressInfo(
-                        taskIndex,
-                        TaskInfo.TASK_NAME_DOWNLOAD,
-                        progress,
-                        info
+                        taskIndex, TaskInfo.TASK_NAME_DOWNLOAD, progress, info
                     )
                 }).fold(
                 onSuccess = { path ->
@@ -820,24 +781,22 @@ class MainActivity : AppCompatActivity() {
                 },
                 onFailure = { e ->
                     Logger.e("下载出错了，详情：${e.message}")
-                    val info = if (e.message?.contains("404") == true)
-                        "${
-                            DateUtils.date2String(
-                                date,
-                                DateUtils.SDF_DATE_ONLY_CN_SIMPLE
-                            )
-                        }的文件未找到或尚未发布。" else e.message ?: "原因不详"
+                    val fileNotFound = e.message?.contains("404") == true
+                    val info = if (fileNotFound) "${
+                        DateUtils.date2String(
+                            date, DateUtils.SDF_DATE_ONLY_CN_SIMPLE
+                        )
+                    }的文件未找到或尚未发布。" else e.message ?: "原因不详"
                     dispatchProgressInfo(
-                        taskIndex,
-                        TaskInfo.TASK_NAME_DOWNLOAD,
-                        -1,
-                        info
+                        taskIndex, TaskInfo.TASK_NAME_DOWNLOAD, -1, info
                     )
-                    delay(1000)
-                    closeTaskDialog()
+                    closeTaskDialogOnUi()
+                    if(fileNotFound)
+                        dialogWith1Btn("提示", info, cancellable = true)
+                    else
+                        toastOnUi("${TaskInfo.TASK_NAME_DOWNLOAD}失败，详情：$info")
                     return@launch
-                }
-            )
+                })
 
             Logger.i(TAG, "filePah = $filePath")
             //2.unzip
@@ -849,29 +808,19 @@ class MainActivity : AppCompatActivity() {
                 zipFile.parent!! + File.separator + baseUrl,
                 onProgress = { progress, info ->
                     dispatchProgressInfo(
-                        taskIndex,
-                        TaskInfo.TASK_NAME_UNZIP,
-                        progress,
-                        info
+                        taskIndex, TaskInfo.TASK_NAME_UNZIP, progress, info
                     )
-                }
-            ).fold(
-                onSuccess = {
-                    Logger.i("解压完成1")
-                },
-                onFailure = { e ->
-                    Logger.e(TAG, "解压出错了")
-                    dispatchProgressInfo(
-                        taskIndex,
-                        TaskInfo.TASK_NAME_UNZIP,
-                        -1,
-                        e.message ?: "原因不详"
-                    )
-                    delay(1000)
-                    closeTaskDialog()
-                    return@launch
-                }
-            )
+                }).fold(onSuccess = {
+                Logger.i("解压完成1")
+            }, onFailure = { e ->
+                Logger.e(TAG, "${TaskInfo.TASK_NAME_UNZIP}出错了")
+                dispatchProgressInfo(
+                    taskIndex, TaskInfo.TASK_NAME_UNZIP, -1, e.message ?: "原因不详"
+                )
+                toastOnUi("${TaskInfo.TASK_NAME_UNZIP}失败，详情：${e.message}")
+                closeTaskDialogOnUi()
+                return@launch
+            })
             if (delZipAfterUnzip) {
                 zipFile.delete()
             }
@@ -886,29 +835,19 @@ class MainActivity : AppCompatActivity() {
                 (resources.displayMetrics.density * 100).toInt(),
                 onProgress = { progress, info ->
                     dispatchProgressInfo(
-                        taskIndex,
-                        TaskInfo.TASK_NAME_MODIFY_HTML_FILE,
-                        progress,
-                        info
+                        taskIndex, TaskInfo.TASK_NAME_MODIFY_HTML_FILE, progress, info
                     )
-                }
-            ).fold(
-                onSuccess = {
-                    Logger.e(TAG, "完成文件处理")
-                },
-                onFailure = { e ->
-                    Logger.e(TAG, "处理文件出错了,详情：${e.message}")
-                    dispatchProgressInfo(
-                        taskIndex,
-                        TaskInfo.TASK_NAME_MODIFY_HTML_FILE,
-                        -1,
-                        e.message ?: "原因不详"
-                    )
-                    delay(1000)
-                    closeTaskDialog()
-                    return@launch
-                }
-            )
+                }).fold(onSuccess = {
+                Logger.e(TAG, "完成文件处理")
+            }, onFailure = { e ->
+                Logger.e(TAG, "${TaskInfo.TASK_NAME_MODIFY_HTML_FILE}出错了,详情：${e.message}")
+                dispatchProgressInfo(
+                    taskIndex, TaskInfo.TASK_NAME_MODIFY_HTML_FILE, -1, e.message ?: "原因不详"
+                )
+                toastOnUi("${TaskInfo.TASK_NAME_MODIFY_HTML_FILE}失败，详情：${e.message}")
+                closeTaskDialogOnUi()
+                return@launch
+            })
 
             //4.loadUrl
             if (!isActive) return@launch
@@ -919,7 +858,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun runTasksForWebViewReload(taskName: String) {
+    private fun runTasksForWebViewReload(taskName: String = TaskInfo.TASK_NAME_MODIFY_CSS_FILE) {
         Logger.i(TAG, "runTasksForWebViewReload...")
         lifecycleScope.launch(Dispatchers.IO) {
             taskIndex = 0
@@ -928,23 +867,19 @@ class MainActivity : AppCompatActivity() {
 
             //1.修改
             taskIndex++
-            dispatchProgressInfo(taskIndex, taskName, 0, "开始修改样式文件...")
-            val taskInfo = PageUtil.generateStyleCss(
-                100 + fontZoomScale,
-                MyApp.currentNightMode == AppCompatDelegate.MODE_NIGHT_YES
-            )
-            if (taskInfo.isError) {
-                dispatchProgressInfo(
-                    taskIndex,
-                    taskName,
-                    -1,
-                    taskInfo.errorInfo
-                )
+            dispatchProgressInfo(taskIndex, taskName, 0, "开始${taskName}...")
+            PageUtil.generateStyleCss(
+                100 + fontZoomScale, MyApp.currentNightMode == AppCompatDelegate.MODE_NIGHT_YES
+            ).fold(onSuccess = {
+                dispatchProgressInfo(taskIndex, taskName, 100, "${taskName}成功")
+            }, onFailure = { e ->
+                toastOnUi("${taskName}失败，详情：${e.message}")
+                closeTaskDialogOnUi()
                 return@launch
-            }
-            dispatchProgressInfo(taskIndex, taskName, 100, "修改样式文件成功")
+            })
             if (!isFirstPageStarted) {
-                runOnUiThread { toast(R.string.info_no_loaded_page) }
+                toastOnUi(R.string.info_no_loaded_page)
+                closeTaskDialogOnUi()
                 return@launch
             }
             //2. reload
@@ -966,37 +901,28 @@ class MainActivity : AppCompatActivity() {
 
             taskIndex++
             dispatchProgressInfo(
-                taskIndex,
-                TaskInfo.TASK_NAME_CLEAN_HISTORY,
-                0,
-                "开始清理存档..."
+                taskIndex, TaskInfo.TASK_NAME_CLEAN_HISTORY, 0, "开始清理存档..."
             )
             FileUtil.clearFiles(list) { progress, info ->
                 dispatchProgressInfo(
+                    taskIndex, TaskInfo.TASK_NAME_CLEAN_HISTORY, progress, info
+                )
+            }.fold(onSuccess = {
+                dispatchProgressInfo(
                     taskIndex,
                     TaskInfo.TASK_NAME_CLEAN_HISTORY,
-                    progress,
-                    info
+                    100,
+                    "${TaskInfo.TASK_NAME_CLEAN_HISTORY}成功"
                 )
-            }.fold(
-                onSuccess = {},
-                onFailure = { e ->
-                    dispatchProgressInfo(
-                        taskIndex,
-                        TaskInfo.TASK_NAME_CLEAN_HISTORY,
-                        -1,
-                        e.message ?: "原因不详"
-                    )
-                    return@launch
-                }
-            )
-            runOnUiThread { toast(R.string.info_clear_history_ok) }
-            dispatchProgressInfo(
-                taskIndex,
-                TaskInfo.TASK_NAME_CLEAN_HISTORY,
-                100,
-                "完成清理存档"
-            )
+                toastOnUi("${TaskInfo.TASK_NAME_CLEAN_HISTORY}成功")
+                closeTaskDialogOnUi()
+            }, onFailure = { e ->
+                dispatchProgressInfo(
+                    taskIndex, TaskInfo.TASK_NAME_CLEAN_HISTORY, -1, e.message ?: "原因不详"
+                )
+                toastOnUi("${TaskInfo.TASK_NAME_CLEAN_HISTORY}失败，详情：${e.message}")
+                closeTaskDialogOnUi()
+            })
         }
     }
 
@@ -1014,29 +940,21 @@ class MainActivity : AppCompatActivity() {
                 if (!taskHistory.contains(succInfo)) //连续切换出现问题，特别是 zoom 时
                     taskHistory += succInfo
             }
-            val taskInfo = if (progress == -2)
-                "$taskHistory$taskIndex.${info}"
-            else if (progress == -1)
-                ""
+            val taskInfo = if (progress == -2) "$taskHistory$taskIndex.${info}"
+            else if (progress == -1) ""
             else {
-                if (taskName != TaskInfo.TASK_NAME_DOWNLOAD)
-                    "$taskHistory$taskIndex.${if (showDetailInfo) info else "正在${taskName}中..."}"//！！！暂未将传递过来的正常运行信息显示
-                else
-                    "$taskHistory$taskIndex.${info}"
+                if (taskName != TaskInfo.TASK_NAME_DOWNLOAD) "$taskHistory$taskIndex.${if (showDetailInfo) info else "正在${taskName}中..."}"//！！！暂未将传递过来的正常运行信息显示
+                else "$taskHistory$taskIndex.${info}"
             }
             viewModel.setProgress(
                 TaskInfo(
-                    taskName,
-                    taskInfo,
-                    progress,
-                    if (progress == -1) info else "",
-                    progress == -1
+                    taskName, taskInfo, progress, if (progress == -1) info else "", progress == -1
                 )
             )
         }
     }
 
-    private fun closeTaskDialog(cancelTask: Boolean = true) {
+    private fun closeTaskDialogOnUi(cancelTask: Boolean = true) {
         runOnUiThread {
             if (cancelTask) {
                 taskJob?.cancel(_root_ide_package_.kotlinx.coroutines.CancellationException())
@@ -1047,6 +965,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun toastOnUi(message: String, long: Boolean = true) {
+        runOnUiThread {
+            toast(message, long)
+        }
+    }
+
+    private fun toastOnUi(messageId: Int, long: Boolean = true) {
+        runOnUiThread {
+            toast(messageId, long)
+        }
+    }
+
     private fun inFullScreenState() = fullScreenView != null
 
     @SuppressLint("WrongConstant")
@@ -1054,8 +984,7 @@ class MainActivity : AppCompatActivity() {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.GET_WEB_CHROME_CLIENT)) {
             WebViewCompat.getWebChromeClient(binding.webView)?.onHideCustomView()
         }
-        if (lastOrientation != requestedOrientation)
-            setRequestedOrientation(lastOrientation)
+        if (lastOrientation != requestedOrientation) setRequestedOrientation(lastOrientation)
     }
 
     @Suppress("DEPRECATION")
@@ -1065,9 +994,8 @@ class MainActivity : AppCompatActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             //1.
             val attrs = window.attributes
-            attrs.flags = attrs.flags or
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN or
-                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            attrs.flags =
+                attrs.flags or WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
             if (Build.VERSION.SDK_INT >= 28) {
                 attrs.layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
@@ -1088,13 +1016,7 @@ class MainActivity : AppCompatActivity() {
                 // and API 19 (KitKat). It is safe to use them, as they are inlined
                 // at compile-time and do nothing on earlier devices.
                 binding.root.systemUiVisibility =
-                    View.SYSTEM_UI_FLAG_LOW_PROFILE or
-                            View.SYSTEM_UI_FLAG_FULLSCREEN or
-                            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    View.SYSTEM_UI_FLAG_LOW_PROFILE or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 //}
             }
             //2.
@@ -1106,13 +1028,11 @@ class MainActivity : AppCompatActivity() {
                 TAG,
                 "currentOrientation = $requestedOrientation, lastOrientation = $lastOrientation"
             )
-            if (lastOrientation != requestedOrientation)
-                setRequestedOrientation(lastOrientation)
+            if (lastOrientation != requestedOrientation) setRequestedOrientation(lastOrientation)
             //1.
             val attrs = window.attributes
             attrs.flags = attrs.flags and WindowManager.LayoutParams.FLAG_FULLSCREEN.inv()
-            attrs.flags = attrs.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
-            /*if (Build.VERSION.SDK_INT >= 28) {
+            attrs.flags = attrs.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()/*if (Build.VERSION.SDK_INT >= 28) {
                 attrs.layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
             }*/
@@ -1127,8 +1047,7 @@ class MainActivity : AppCompatActivity() {
                 }
             } else {
                 binding.root.systemUiVisibility =
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 //}
             }
             //2.
@@ -1139,17 +1058,23 @@ class MainActivity : AppCompatActivity() {
     private fun initialCheck(date: Date = Date()) {
         Logger.i(TAG, "initialCheck...")
         showTaskRunningDialog(
-            selectedDate,
-            zipWithPic
-        ) { date, withPic ->
+            selectedDate, zipWithPic
+        ) { date, _ ->
             lifecycleScope.launch(Dispatchers.IO) {
                 taskIndex = 0
                 taskHistory = ""
 
-                //1.检查夜间模式，修改css style
-                if (delegate.localNightMode != MyApp.currentNightMode) {
-                    runOnUiThread {
-                        delegate.localNightMode = MyApp.currentNightMode
+                //1.检查css、夜间模式，修改css style
+                if (!File(
+                        filesDir.absolutePath,
+                        "style.css"
+                    ).exists() || delegate.localNightMode != MyApp.currentNightMode
+                ) {
+                    //修改夜间模式
+                    if (delegate.localNightMode != MyApp.currentNightMode) {
+                        runOnUiThread {
+                            delegate.localNightMode = MyApp.currentNightMode
+                        }
                     }
                     //修改网页模式
                     taskIndex++
@@ -1157,27 +1082,23 @@ class MainActivity : AppCompatActivity() {
                         taskIndex,
                         TaskInfo.TASK_NAME_MODIFY_CSS_FILE,
                         0,
-                        "开始修改样式文件..."
+                        "开始${TaskInfo.TASK_NAME_MODIFY_CSS_FILE}..."
                     )
-                    val taskInfo = PageUtil.generateStyleCss(
+                    PageUtil.generateStyleCss(
                         100 + fontZoomScale,
                         MyApp.currentNightMode == AppCompatDelegate.MODE_NIGHT_YES
-                    )
-                    if (taskInfo.isError) {
+                    ).fold(onSuccess = {
                         dispatchProgressInfo(
                             taskIndex,
                             TaskInfo.TASK_NAME_MODIFY_CSS_FILE,
-                            -1,
-                            taskInfo.errorInfo
+                            100,
+                            "${TaskInfo.TASK_NAME_MODIFY_CSS_FILE}成功"
                         )
+                    }, onFailure = { e ->
+                        toastOnUi("${TaskInfo.TASK_NAME_MODIFY_CSS_FILE}失败，详情：${e.message}")
+                        closeTaskDialogOnUi()
                         return@launch
-                    }
-                    dispatchProgressInfo(
-                        taskIndex,
-                        TaskInfo.TASK_NAME_MODIFY_CSS_FILE,
-                        100,
-                        "修改样式文件成功"
-                    )
+                    })
                 }
 
                 //2.检查归档情况
@@ -1186,17 +1107,21 @@ class MainActivity : AppCompatActivity() {
                     File(filesDir.absolutePath + File.separator + date.toFilePath(true, false))
                 val fileNewWithoutPic =
                     File(filesDir.absolutePath + File.separator + date.toFilePath(false, false))
-                if (!fileNewWithPic.exists() && !fileNewWithoutPic.exists()) {
+                newWithPicState = if (!fileNewWithPic.exists() && !fileNewWithoutPic.exists()) {
                     runOnUiThread {
+                        dateString = ""
+                        selectedDate = Date()
+                        setPref(PREF_CURRENT_BROWSING_DATE, "")
+                        closeTaskDialogOnUi()
                         showCalendarDialog()
                     }
                     return@launch
                 } else if (fileNewWithPic.exists() || !fileNewWithoutPic.exists()) {
-                    newWithPicState = true
+                    true
                 } else if (!fileNewWithPic.exists() || fileNewWithoutPic.exists()) {
-                    newWithPicState = false
+                    false
                 } else {
-                    newWithPicState = true
+                    true
                 }
 
                 launch(Dispatchers.Main) {
@@ -1209,8 +1134,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun modifyHtmlAndLoadMyUrl(date: Date = Date()) {
         showTaskRunningDialog(
-            date,
-            zipWithPic
+            date, zipWithPic
         ) { date, _ ->
             taskJob = lifecycleScope.launch(Dispatchers.IO) {
                 taskIndex = 0
@@ -1221,11 +1145,12 @@ class MainActivity : AppCompatActivity() {
                 val list = mutableListOf<Boolean>()
                 var newWithPicState: Boolean
                 val fileNewWithPic =
-                    File(filesDir.absolutePath + File.separator + date.toFilePath(true, false))
+                    File(filesDir.absolutePath + File.separator + date.toFilePath(true, true))
                 val fileNewWithoutPic =
-                    File(filesDir.absolutePath + File.separator + date.toFilePath(false, false))
+                    File(filesDir.absolutePath + File.separator + date.toFilePath(false, true))
                 if (!fileNewWithPic.exists() && !fileNewWithoutPic.exists()) {
-                    toast("所选日期的归档不存在！")
+                    toastOnUi("所选日期的归档不存在！")
+                    closeTaskDialogOnUi()
                     return@launch
                 } else if (fileNewWithPic.exists() || !fileNewWithoutPic.exists()) {
                     list.add(true)
@@ -1250,29 +1175,25 @@ class MainActivity : AppCompatActivity() {
                         (resources.displayMetrics.density * 100).toInt(),
                         onProgress = { progress, info ->
                             dispatchProgressInfo(
-                                taskIndex,
-                                TaskInfo.TASK_NAME_MODIFY_HTML_FILE,
-                                progress,
-                                info
+                                taskIndex, TaskInfo.TASK_NAME_MODIFY_HTML_FILE, progress, info
                             )
-                        }
-                    ).fold(
-                        onSuccess = {
-                            Logger.e(TAG, "完成文件处理")
-                        },
-                        onFailure = { e ->
-                            Logger.e(TAG, "处理文件出错了,详情：${e.message}")
-                            dispatchProgressInfo(
-                                taskIndex,
-                                TaskInfo.TASK_NAME_MODIFY_HTML_FILE,
-                                -1,
-                                e.message ?: "原因不详"
-                            )
-                            delay(1000)
-                            closeTaskDialog()
-                            return@launch
-                        }
-                    )
+                        }).fold(onSuccess = {
+                        Logger.e(TAG, "完成${TaskInfo.TASK_NAME_MODIFY_HTML_FILE}")
+                    }, onFailure = { e ->
+                        Logger.e(
+                            TAG,
+                            "${TaskInfo.TASK_NAME_MODIFY_HTML_FILE}出错了,详情：${e.message}"
+                        )
+                        dispatchProgressInfo(
+                            taskIndex,
+                            TaskInfo.TASK_NAME_MODIFY_HTML_FILE,
+                            -1,
+                            e.message ?: "原因不详"
+                        )
+                        toastOnUi("${TaskInfo.TASK_NAME_MODIFY_HTML_FILE}出错了,详情：${e.message}")
+                        closeTaskDialogOnUi()
+                        return@launch
+                    })
                 }
 
                 //3.loadUrl
@@ -1323,8 +1244,7 @@ class MainActivity : AppCompatActivity() {
             newWithPicState = true
         }
         showTaskRunningDialog(
-            date,
-            newWithPicState
+            date, newWithPicState
         ) { date, withPic ->
             taskIndex = 0
             taskHistory = ""
@@ -1362,33 +1282,12 @@ class MainActivity : AppCompatActivity() {
         )*/
     }
 
-    fun createPageCss() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            //1.
-            Logger.i(TAG, "createPageCss...")
-            if (File(filesDir.absolutePath, "style.css").exists())
-                return@launch
-            PageUtil.generateStyleCss(
-                100 + fontZoomScale,
-                MyApp.currentNightMode == AppCompatDelegate.MODE_NIGHT_YES
-            )
-            Logger.i(TAG, "createPageCss: OK...")
-            //2.
-            //if (filesDir.listFiles { it.isDirectory }?.size == 0) {
-            //    runOnUiThread {
-            //        showCalendarDialog()
-            //    }
-            //}
-        }
-    }
-
     fun changePageCss() {
         Logger.i(TAG, "changePageCss: webview.reload[$fontZoomScale]...")
         showTaskRunningDialog(
-            selectedDate,
-            zipWithPic
+            selectedDate, zipWithPic
         ) { date, withPic ->
-            runTasksForWebViewReload(TaskInfo.TASK_NAME_MODIFY_CSS_FILE)
+            runTasksForWebViewReload()
         }
     }
 
@@ -1401,24 +1300,19 @@ class MainActivity : AppCompatActivity() {
                 (resources.displayMetrics.density * 100).toInt(),
                 onProgress = { progress, info ->
                     Logger.i(TAG, $"修改: $progress, $info")
-                }
-            )
+                })
         }
     }
 
     fun collectData(): List<HistoryItem> {
         val data = mutableListOf<HistoryItem>()
         //1.
-        val map = (filesDir.listFiles()?.filter { it.isDirectory } ?: emptyList())
-            .asSequence()
+        val map = (filesDir.listFiles()?.filter { it.isDirectory } ?: emptyList()).asSequence()
             .map { file ->
                 if (file.name.endsWith("-t")) file.name.replace(
-                    "-t",
-                    ""
+                    "-t", ""
                 ) else file.name
-            }
-            .distinct()
-            .filter { name -> name.matches(Regex("\\d{4}-\\d{1,2}-\\d{1,2}")) }
+            }.distinct().filter { name -> name.matches(Regex("\\d{4}-\\d{1,2}-\\d{1,2}")) }
             .map { name ->
                 val s = name.split("-")
                 YearMonthAndDay("${s[0]}年${s[1].toInt()}月", s[2].toInt())
@@ -1428,8 +1322,7 @@ class MainActivity : AppCompatActivity() {
             var list =
                 map[yearMonth]?.map { SelectedStateOfHistoryItem(it.day, false) } ?: emptyList()
             list = list.sortedBy { it.day }
-            if (list.isNotEmpty())
-                data.add(HistoryItem(yearMonth, list))
+            if (list.isNotEmpty()) data.add(HistoryItem(yearMonth, list))
         }
         return data.sortedBy { it.yearMonth }
     }
