@@ -25,19 +25,16 @@ object HttpUtil {
         WebViewFeature.isFeatureSupported(WebViewFeature.PROXY_OVERRIDE)
 
     fun setProxyForWebView(
-        proxyHost: String = MyApp.proxyHost,
-        proxyPort: Int = MyApp.proxyPort
+        proxyHost: String = MyApp.proxyHost, proxyPort: Int = MyApp.proxyPort
     ) {
         if (!MyApp.USE_PROXY) return
         if (WebViewFeature.isFeatureSupported(WebViewFeature.PROXY_OVERRIDE)) {
             Logger.i("[NET]", "可以设置代理……")
-            val proxyConfig = ProxyConfig.Builder()
-                .addProxyRule("http://$proxyHost:$proxyPort")
+            val proxyConfig = ProxyConfig.Builder().addProxyRule("http://$proxyHost:$proxyPort")
                 .addProxyRule("https://$proxyHost:$proxyPort")
                 .addProxyRule("socks://$proxyHost:$proxyPort")
                 //.addDirect() //直连
-                .build()
-            /*网站直连
+                .build()/*网站直连
             这种方式是应用内的 WebView 全局代理，如果需要绕过某些网站，可以指定，或者使用通配符进行绕过:
             val proxyConfig = ProxyConfig.Builder()
                 .addProxyRule("http://192.168.0.26:8100")
@@ -45,15 +42,13 @@ object HttpUtil {
                 .addBypassRule("www.bing.com")
                 .addBypassRule("*.bing.com")
                 .addDirect().build()*/
-            ProxyController.getInstance().setProxyOverride(
-                proxyConfig, { executor ->
-                    {
-                        //Logger.i("[NET]", "代理设置完成")
-                    }
-                },
+            ProxyController.getInstance().setProxyOverride(proxyConfig, { executor ->
                 {
-                    Logger.i("[NET]", "WebView代理已设置")
-                })
+                    //Logger.i("[NET]", "代理设置完成")
+                }
+            }, {
+                Logger.i("[NET]", "WebView代理已设置")
+            })
 
         }
     }
@@ -67,15 +62,12 @@ object HttpUtil {
     fun getDownloadUrl(date: Date, withPic: Boolean): String {
         val urlPart = DateUtils.format(date, DateUtils.SDF_URL_LINK) // yyyy/M/d
         var fileName = DateUtils.format(date, DateUtils.SDF_DATE_ONLY_EN) // yyyy-M-d
-        if (withPic)
-            fileName += "-t"
+        if (withPic) fileName += "-t"
         return "https://m.minghui.org/mh/articles/$urlPart$fileName.zip"
     }
 
     suspend fun downloadFile(
-        context: Context,
-        urlString: String,
-        onProgress: ((Int, String) -> Unit)? = null
+        context: Context, urlString: String, onProgress: ((Int, String) -> Unit)? = null
     ): Result<String> = withContext(Dispatchers.IO) {
         // 打开连接
         try {
@@ -125,9 +117,10 @@ object HttpUtil {
             onProgress?.invoke(100, "下载成功")
             return@withContext Result.success(file.absolutePath)
         } catch (e: Exception) {
-            Logger.e(TAG, e.message ?: "错误原因不详")
+            Logger.e(TAG, "下载文件失败，详情：${e.message}")
             return@withContext Result.failure(Exception(e))
         }
     }
+
 
 }
