@@ -19,7 +19,7 @@ object PageUtil {
     suspend fun generateStyleCss(
         zoomScale: Int = 100,
         nightTheme: Boolean = false
-    ): TaskInfo = withContext(Dispatchers.IO) {
+    ): Result<Boolean> = withContext(Dispatchers.IO) {
         val metrics = DisplayUtil.getDisplayMetrics(MyApp.appContext)
         val maxWidth = (metrics.widthPixels * 9 / 10 / metrics.density).toInt()
         Logger.i(TAG, "generateStyleCss: maxWidth = $maxWidth")
@@ -116,22 +116,10 @@ object PageUtil {
                 File("${MyApp.appContext.filesDir.absolutePath + File.separator}style.css")
             cssFile.writeText(pattern)
             Logger.i(TAG, "写入css成功")
-            return@withContext TaskInfo(
-                TaskInfo.TASK_NAME_MODIFY_CSS_FILE,
-                "修改样式文件成功",
-                100,
-                "",
-                false
-            )
+            return@withContext Result.success(true)
         } catch (e: Exception) {
             Logger.i(TAG, "写入css失败，error=${e.message}")
-            return@withContext TaskInfo(
-                TaskInfo.TASK_NAME_MODIFY_CSS_FILE,
-                "",
-                -1,
-                "修改样式文件失败，error=${e.message}",
-                true
-            )
+            return@withContext Result.failure(e)
         }
     }
 
@@ -273,7 +261,16 @@ object PageUtil {
                             }
                         } else {
                             if (imgs.isNotEmpty()) {
-                                img.attr("width", "${maxWidth / tds.size}")
+                                if (imgs.size == 1 && tds.size == 1) {
+                                    img.attr(
+                                        "style",
+                                        "max-width:${maxWidth}px;max-height:${maxWidth}px;"
+                                    )
+                                    tds[0].attr("align", "center")
+                                    table.attr("width", "${maxWidth}px")
+                                } else {
+                                    img.attr("width", "${maxWidth / tds.size}")
+                                }
                                 img.attr("height", "auto")
                                 totalImgWidth += maxWidth / tds.size
                             }
@@ -399,7 +396,7 @@ object PageUtil {
     }
 
     fun dateToFileName(date: Date, withPic: Boolean = true): String {
-        val dateString = DateUtils.date2String(date,DateUtils.SDF_DATE_ONLY_EN)
+        val dateString = DateUtils.date2String(date, DateUtils.SDF_DATE_ONLY_EN)
         return dateString + (if (withPic) "-t" else "")
     }
 
