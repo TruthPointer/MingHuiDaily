@@ -51,6 +51,7 @@ import org.tpmobile.minghuidaily.data.TaskInfo
 import org.tpmobile.minghuidaily.data.YearMonthAndDay
 import org.tpmobile.minghuidaily.databinding.ActivityMainBinding
 import org.tpmobile.minghuidaily.util.DateUtils
+import org.tpmobile.minghuidaily.util.DisplayUtil
 import org.tpmobile.minghuidaily.util.FileUtil
 import org.tpmobile.minghuidaily.util.HttpUtil
 import org.tpmobile.minghuidaily.util.LIST_TYPE_OF_PICTURE
@@ -291,6 +292,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun initView() {
+        DisplayUtil.printDisplayInfo(this)
+
         dateString = getPref(PREF_CURRENT_BROWSING_DATE, "")
         selectedDate = DateUtils.dateStringToDate(dateString)
 
@@ -774,29 +777,25 @@ class MainActivity : AppCompatActivity() {
                     dispatchProgressInfo(
                         taskIndex, TaskInfo.TASK_NAME_DOWNLOAD, progress, info
                     )
-                }).fold(
-                onSuccess = { path ->
-                    Logger.i("成功下载")
-                    filePath = path
-                },
-                onFailure = { e ->
-                    Logger.e("下载出错了，详情：${e.message}")
-                    val fileNotFound = e.message?.contains("404") == true
-                    val info = if (fileNotFound) "${
-                        DateUtils.date2String(
-                            date, DateUtils.SDF_DATE_ONLY_CN_SIMPLE
-                        )
-                    }的文件未找到或尚未发布。" else e.message ?: "原因不详"
-                    dispatchProgressInfo(
-                        taskIndex, TaskInfo.TASK_NAME_DOWNLOAD, -1, info
+                }).fold(onSuccess = { path ->
+                Logger.i("成功下载")
+                filePath = path
+            }, onFailure = { e ->
+                Logger.e("下载出错了，详情：${e.message}")
+                val fileNotFound = e.message?.contains("404") == true
+                val info = if (fileNotFound) "${
+                    DateUtils.date2String(
+                        date, DateUtils.SDF_DATE_ONLY_CN_SIMPLE
                     )
-                    closeTaskDialogOnUi()
-                    if(fileNotFound)
-                        dialogWith1Btn("提示", info, cancellable = true)
-                    else
-                        toastOnUi("${TaskInfo.TASK_NAME_DOWNLOAD}失败，详情：$info")
-                    return@launch
-                })
+                }的文件未找到或尚未发布。" else e.message ?: "原因不详"
+                dispatchProgressInfo(
+                    taskIndex, TaskInfo.TASK_NAME_DOWNLOAD, -1, info
+                )
+                closeTaskDialogOnUi()
+                if (fileNotFound) dialogWith1Btn("提示", info, cancellable = true)
+                else toastOnUi("${TaskInfo.TASK_NAME_DOWNLOAD}失败，详情：$info")
+                return@launch
+            })
 
             Logger.i(TAG, "filePah = $filePath")
             //2.unzip
@@ -1066,8 +1065,7 @@ class MainActivity : AppCompatActivity() {
 
                 //1.检查css、夜间模式，修改css style
                 if (!File(
-                        filesDir.absolutePath,
-                        "style.css"
+                        filesDir.absolutePath, "style.css"
                     ).exists() || delegate.localNightMode != MyApp.currentNightMode
                 ) {
                     //修改夜间模式
@@ -1181,8 +1179,7 @@ class MainActivity : AppCompatActivity() {
                         Logger.e(TAG, "完成${TaskInfo.TASK_NAME_MODIFY_HTML_FILE}")
                     }, onFailure = { e ->
                         Logger.e(
-                            TAG,
-                            "${TaskInfo.TASK_NAME_MODIFY_HTML_FILE}出错了,详情：${e.message}"
+                            TAG, "${TaskInfo.TASK_NAME_MODIFY_HTML_FILE}出错了,详情：${e.message}"
                         )
                         dispatchProgressInfo(
                             taskIndex,
