@@ -7,7 +7,6 @@ import org.jsoup.nodes.Element
 import org.jsoup.nodes.TextNode
 import org.jsoup.select.Elements
 import org.tpmobile.minghuidaily.MyApp
-import org.tpmobile.minghuidaily.data.TaskInfo
 import org.tpmobile.minghuidaily.util.ktx.toFilePath
 import java.io.File
 import java.util.Date
@@ -17,8 +16,7 @@ object PageUtil {
     private const val TAG = "PageUtil"
 
     suspend fun generateStyleCss(
-        zoomScale: Int = 100,
-        nightTheme: Boolean = false
+        zoomScale: Int = 100, nightTheme: Boolean = false
     ): Result<Boolean> = withContext(Dispatchers.IO) {
         val metrics = DisplayUtil.getDisplayMetrics(MyApp.appContext)
         val maxWidth = (metrics.widthPixels * 9 / 10 / metrics.density).toInt()
@@ -152,12 +150,10 @@ object PageUtil {
             onProgress(0, "开始适配网页文件...")
 
             val file = MyApp.appContext.filesDir.absolutePath + File.separator + date.toFilePath(
-                withPic,
-                true
+                withPic, true
             )
             val newFile = MyApp.appContext.filesDir.absolutePath + File.separator + date.toFilePath(
-                withPic,
-                false
+                withPic, false
             )
             Logger.i(TAG, "file = $file")
             Logger.i(TAG, "newFile = $newFile")
@@ -229,69 +225,85 @@ object PageUtil {
             val tableSize = tables.size
             Logger.i(TAG, "tables.size: ${tables.size}")
             tables?.forEachIndexed { index, table ->
-                //调整img宽度，有两种情况，attr 有width，或者其 style里有width
-                table.select("tr").forEach { tr ->
-                    totalImgWidth = 0
-                    tds = tr.select("td")
-                    imgs = tr.select("img")
-                    var imgRatio: Float
-                    imgs.forEach { img ->
-                        img.removeAttr("style")
-
-                        val width = img.attr("width").toIntOrNull() ?: 0
-                        val height = img.attr("height").toIntOrNull() ?: 0
-
-                        imgWidth = width * density / 100
-                        if (width > 0 && height > 0) {
-                            imgRatio = height.toFloat() / width.toFloat()
-                            if (imgWidth > scaledWidth) {
-                                img.attr("width", "${maxWidth / tds.size}")
-                                img.attr("height", "${maxWidth / tds.size * imgRatio}")
-                                totalImgWidth += maxWidth / tds.size
-                            } else {
-                                totalImgWidth += width
-                            }
-                        } else if (width > 0 && height == 0) {
-                            if (imgWidth > scaledWidth) {
-                                img.attr("width", "${maxWidth / tds.size}")
-                                img.attr("height", "auto")
-                                totalImgWidth += maxWidth / tds.size
-                            } else {
-                                totalImgWidth += width
-                            }
-                        } else {
-                            if (imgs.isNotEmpty()) {
-                                if (imgs.size == 1 && tds.size == 1) {
-                                    img.attr(
-                                        "style",
-                                        "max-width:${maxWidth}px;max-height:${maxWidth}px;"
-                                    )
-                                    tds[0].attr("align", "center")
-                                    table.attr("width", "${maxWidth}px")
-                                } else {
-                                    img.attr("width", "${maxWidth / tds.size}")
-                                }
-                                img.attr("height", "auto")
-                                totalImgWidth += maxWidth / tds.size
-                            }
-                            //其它在 style 里有 max-width 来设定
-                        }
-                    }
-                    if (totalImgWidth > scaledWidth) {
+                //避免重复处理
+                if ((table.parents()
+                        .joinToString { it.tagName() }).contains("table")
+                ) return@forEachIndexed
+                if (withPic) {
+                    //调整img宽度，有两种情况，attr 有width，或者其 style里有width
+                    table.select("tr").forEach { tr ->
+                        totalImgWidth = 0
+                        tds = tr.select("td")
+                        imgs = tr.select("img")
+                        var imgRatio: Float
                         imgs.forEach { img ->
-                            imgWidth = img.attr("width").toIntOrNull() ?: 0
-                            imgHeight = img.attr("height").toIntOrNull() ?: 0
-                            img.attr("width", "${imgWidth * scaledWidth / totalImgWidth}")
-                            if (imgHeight > 0) {
-                                img.attr("height", "${imgHeight * scaledWidth / totalImgWidth}")
+                            img.removeAttr("style")
+
+                            val width = img.attr("width").toIntOrNull() ?: 0
+                            val height = img.attr("height").toIntOrNull() ?: 0
+
+                            imgWidth = width * density / 100
+                            if (width > 0 && height > 0) {
+                                imgRatio = height.toFloat() / width.toFloat()
+                                if (imgWidth > scaledWidth) {
+                                    img.attr("width", "${maxWidth / tds.size}")
+                                    img.attr("height", "${maxWidth / tds.size * imgRatio}")
+                                    totalImgWidth += maxWidth / tds.size
+                                } else {
+                                    totalImgWidth += width
+                                }
+                            } else if (width > 0 && height == 0) {
+                                if (imgWidth > scaledWidth) {
+                                    img.attr("width", "${maxWidth / tds.size}")
+                                    img.attr("height", "auto")
+                                    totalImgWidth += maxWidth / tds.size
+                                } else {
+                                    totalImgWidth += width
+                                }
+                            } else if (width == 0 && height > 0) {
+                                Logger.i(TAG, "img[3]: src=${img.attr("src")}")
+                                img.attr(
+                                    "style",
+                                    "max-width:${maxWidth / tds.size}px;max-height:${height}px;"
+                                )
+                                img.attr("height", "auto")
+                                totalImgWidth += maxWidth / tds.size
+                            } else {
+                                Logger.i(TAG, "img[4]: src=${img.attr("src")}")
+                                img.attr(
+                                    "style",
+                                    "max-width:${maxWidth / tds.size}px;max-height:${maxWidth / tds.size}px;"
+                                )
+                                img.attr("height", "auto")
+                                totalImgWidth += maxWidth / tds.size
+                            }
+                            val tdIndex = img.parents().map { it.tagName() }.indexOf("td")
+                            if (tdIndex != -1) {
+                                img.parents()[tdIndex].attr("align", "center")
+                            }
+                        }
+                        if (totalImgWidth > scaledWidth) {
+                            imgs.forEach { img ->
+                                imgWidth = img.attr("width").toIntOrNull() ?: 0
+                                imgHeight = img.attr("height").toIntOrNull() ?: 0
+                                img.attr("width", "${imgWidth * scaledWidth / totalImgWidth}")
+                                if (imgHeight > 0) {
+                                    img.attr("height", "${imgHeight * scaledWidth / totalImgWidth}")
+                                }
                             }
                         }
                     }
+                } else {
+                    table.select("img").remove()
                 }
                 //调整表宽
-                val tableWidth = table.attr("width").toIntOrNull() ?: 0
-                if (tableWidth * density / 100 > scaledWidth) {//imagewith=scaledWidth*100/density
-                    table.attr("width", "${scaledWidth * 100 / density}px")
+                table.attr("width", "${maxWidth}px")
+                //center table
+                if (table.parents().joinToString { it.tagName() }
+                        .indexOf("center", ignoreCase = true) == -1) {
+                    table.parent()?.appendElement("center")?.also { center ->
+                        table.appendTo(center)
+                    }
                 }
                 Logger.i(TAG, "正在处理table[${index + 1}/$tableSize] > img...")
                 onProgress(10 + ((index + 1) * 70 / tableSize), "正在做第6步修改...")
@@ -359,8 +371,7 @@ object PageUtil {
     /**
      * @return 2025-5-13 或 2025-5-13-t
      */
-    fun getBaseUrl(dateString: String, withPic: Boolean = true): String {
-        /*var dateString = "2025-5-13"
+    fun getBaseUrl(dateString: String, withPic: Boolean = true): String {/*var dateString = "2025-5-13"
         dateString="2026-1-19"
         val withPic = true*/
         return dateString + (if (withPic) "-t" else "")
@@ -369,8 +380,7 @@ object PageUtil {
     /**
      * @return 2025-5-13 或 2025-5-13-t
      */
-    fun getBaseUrl(date: Date, withPic: Boolean = true): String {
-        /*var dateString = "2025-5-13"
+    fun getBaseUrl(date: Date, withPic: Boolean = true): String {/*var dateString = "2025-5-13"
         dateString="2026-1-19"
         val withPic = true*/
         val dateString = DateUtils.date2String(date, DateUtils.SDF_DATE_ONLY_EN)
@@ -381,11 +391,8 @@ object PageUtil {
      * @return 2026/5/13/2025-5-13-t/2025-5-13-t.html
      */
     fun dateToFilePathPart(
-        date: Date,
-        withPic: Boolean = true,
-        originalFile: Boolean = true
-    ): String {
-        /*var dateString = "2025-5-13"
+        date: Date, withPic: Boolean = true, originalFile: Boolean = true
+    ): String {/*var dateString = "2025-5-13"
         dateString="2026-1-19"
         val withPic = true*/
 
