@@ -35,7 +35,7 @@ object DisplayUtil {
         //sb.append("\nscaledDensity   :").append(dm.scaledDensity)
         sb.append("\nxdpi            :").append(dm.xdpi)
         sb.append("\nydpi            :").append(dm.ydpi)
-        //Log.sopln(sb.toString())
+        Logger.i(sb.toString())
         return dm
     }
 
@@ -56,4 +56,3 @@ object DisplayUtil {
     /////////////////
 
 }
-
