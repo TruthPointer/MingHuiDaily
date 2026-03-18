@@ -451,7 +451,16 @@ class MainActivity : AppCompatActivity() {
 
             if (taskInfo.isError) {
                 closeTaskDialogOnUi()
-                dialogWith1Btn("错误", "错误详情：${taskInfo.errorInfo}")
+                runOnUiThread {
+                    dialogWith1Btn("错误", "错误详情：${taskInfo.errorInfo}", povAction = {
+                        if (taskInfo.progress == 404) {
+                            selectedDate = DateUtils.addNDay(selectedDate, -1)
+                            dateString = DateUtils.date2String(selectedDate)
+                            setPref(PREF_CURRENT_BROWSING_DATE, dateString)
+                            showCalendarDialog()
+                        }
+                    })
+                }
             }
         }
     }
@@ -787,13 +796,12 @@ class MainActivity : AppCompatActivity() {
                     DateUtils.date2String(
                         date, DateUtils.SDF_DATE_ONLY_CN_SIMPLE
                     )
-                }的文件未找到或尚未发布。" else e.message ?: "原因不详"
+                }的文件未找到或尚未发布，请选择另外一个日期。" else e.message ?: "原因不详"
                 dispatchProgressInfo(
-                    taskIndex, TaskInfo.TASK_NAME_DOWNLOAD, -1, info
+                    taskIndex, TaskInfo.TASK_NAME_DOWNLOAD, if (fileNotFound) 404 else -1, info
                 )
                 closeTaskDialogOnUi()
-                if (fileNotFound) dialogWith1Btn("提示", info, cancellable = true)
-                else toastOnUi("${TaskInfo.TASK_NAME_DOWNLOAD}失败，详情：$info")
+                if (!fileNotFound) toastOnUi("${TaskInfo.TASK_NAME_DOWNLOAD}失败，详情：$info")
                 return@launch
             })
 
@@ -939,15 +947,16 @@ class MainActivity : AppCompatActivity() {
                 if (!taskHistory.contains(succInfo)) //连续切换出现问题，特别是 zoom 时
                     taskHistory += succInfo
             }
+            val isError = progress == -1 || progress == 404
             val taskInfo = if (progress == -2) "$taskHistory$taskIndex.${info}"
-            else if (progress == -1) ""
+            else if (isError) ""
             else {
                 if (taskName != TaskInfo.TASK_NAME_DOWNLOAD) "$taskHistory$taskIndex.${if (showDetailInfo) info else "正在${taskName}中..."}"//！！！暂未将传递过来的正常运行信息显示
                 else "$taskHistory$taskIndex.${info}"
             }
             viewModel.setProgress(
                 TaskInfo(
-                    taskName, taskInfo, progress, if (progress == -1) info else "", progress == -1
+                    taskName, taskInfo, progress, if (isError) info else "", isError
                 )
             )
         }
