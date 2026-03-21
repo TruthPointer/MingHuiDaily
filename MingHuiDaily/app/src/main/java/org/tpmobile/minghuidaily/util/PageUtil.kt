@@ -16,7 +16,7 @@ object PageUtil {
     private const val TAG = "PageUtil"
 
     suspend fun generateStyleCss(
-        zoomScale: Int = 100, nightTheme: Boolean = false
+        zoomScale: Int = 100, nightTheme: Boolean = false, fontSizeInTable: Float = 0.6f
     ): Result<Boolean> = withContext(Dispatchers.IO) {
         val metrics = DisplayUtil.getDisplayMetrics(MyApp.appContext)
         val maxWidth = (metrics.widthPixels * 9 / 10 / metrics.density).toInt()
@@ -75,7 +75,7 @@ object PageUtil {
         }
         table,td,th{
             max-width:${maxWidth}px;
-            font-size:0.6rem;
+            font-size:${fontSizeInTable}rem;
         }
         img,video,iframe{
             max-width:${maxWidth}px;
