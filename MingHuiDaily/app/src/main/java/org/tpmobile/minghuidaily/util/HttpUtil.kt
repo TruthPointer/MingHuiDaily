@@ -73,7 +73,10 @@ object HttpUtil {
         try {
             onProgress?.invoke(0, "开始下载...")
 
-            val connection = URL(urlString).openConnection() as HttpURLConnection
+            val connection = if(MyApp.USE_PROXY)
+                URL(urlString).openConnection(MyApp.proxy) as HttpURLConnection
+            else
+                URL(urlString).openConnection() as HttpURLConnection
             connection.connectTimeout = 15000
             connection.readTimeout = 15000
             connection.requestMethod = "GET"
@@ -118,7 +121,7 @@ object HttpUtil {
             return@withContext Result.success(file.absolutePath)
         } catch (e: Exception) {
             Logger.e(TAG, "下载文件失败，详情：${e.message}")
-            return@withContext Result.failure(Exception(e))
+            return@withContext Result.failure(e)
         }
     }
 
