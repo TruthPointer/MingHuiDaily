@@ -62,7 +62,7 @@ object ZipUtil {
             Logger.e(TAG, "Error: ${e.message}")
             job?.cancel()
             e.printStackTrace()
-            return@withContext Result.failure(Exception(e))
+            return@withContext Result.failure(e)
         }
     }
 
