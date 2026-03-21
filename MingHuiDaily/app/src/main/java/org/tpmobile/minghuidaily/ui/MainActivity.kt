@@ -786,25 +786,27 @@ class MainActivity : AppCompatActivity() {
                     dispatchProgressInfo(
                         taskIndex, TaskInfo.TASK_NAME_DOWNLOAD, progress, info
                     )
-                }).fold(onSuccess = { path ->
-                Logger.i("成功下载")
-                filePath = path
-            }, onFailure = { e ->
-                Logger.e("下载出错了，详情：${e.message}")
-                val fileNotFound = e.message?.contains("404") == true
-                val info = if (fileNotFound) "${
-                    DateUtils.date2String(
-                        date, DateUtils.SDF_DATE_ONLY_CN_SIMPLE
+                }).fold(
+                onSuccess = { path ->
+                    Logger.i("成功下载")
+                    filePath = path
+                },
+                onFailure = { e ->
+                    Logger.e("下载出错了，详情：${e.message}")
+                    val fileNotFound = e.message?.contains("404") == true
+                    val info = if (fileNotFound) "${
+                        DateUtils.date2String(
+                            date, DateUtils.SDF_DATE_ONLY_CN_SIMPLE
+                        )
+                    }的文件未找到或尚未发布，请选择另外一个日期。" else e.message ?: "原因不详"
+                    dispatchProgressInfo(
+                        taskIndex, TaskInfo.TASK_NAME_DOWNLOAD, if (fileNotFound) 404 else -1, info
                     )
-                }的文件未找到或尚未发布，请选择另外一个日期。" else e.message ?: "原因不详"
-                dispatchProgressInfo(
-                    taskIndex, TaskInfo.TASK_NAME_DOWNLOAD, if (fileNotFound) 404 else -1, info
-                )
-                closeTaskDialogOnUi()
-                if (!fileNotFound) toastOnUi("${TaskInfo.TASK_NAME_DOWNLOAD}失败，详情：$info")
-                return@launch
-            })
-
+                    closeTaskDialogOnUi()
+                    if (!fileNotFound) toastOnUi("${TaskInfo.TASK_NAME_DOWNLOAD}失败，详情：$info")
+                    return@launch
+                }
+            )
             Logger.i(TAG, "filePah = $filePath")
             //2.unzip
             if (!isActive) return@launch
