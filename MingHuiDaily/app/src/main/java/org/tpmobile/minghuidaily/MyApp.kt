@@ -1,17 +1,18 @@
 package org.tpmobile.minghuidaily
 
 import android.app.Application
-import java.net.Proxy
-import java.net.InetSocketAddress
 import android.content.Context
 import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatDelegate
+import org.tpmobile.minghuidaily.util.Logger
 import org.tpmobile.minghuidaily.util.PREF_PROXY_PORT
 import org.tpmobile.minghuidaily.util.PREF_THEME_NIGHT
 import org.tpmobile.minghuidaily.util.PROXY_PORT_FREEGATE
 import org.tpmobile.minghuidaily.util.PROXY_PORT_HOST
 import org.tpmobile.minghuidaily.util.ktx.getPref
 import org.tpmobile.minghuidaily.util.ktx.setPref
+import java.net.InetSocketAddress
+import java.net.Proxy
 
 class MyApp : Application() {
 
@@ -29,14 +30,23 @@ class MyApp : Application() {
         )
 
         fun setProxy(port: Int) {
-            if (port != proxyPort) {
-                setPref(PREF_PROXY_PORT, port)
-                proxyPort = port
-                proxy = Proxy(
-                    Proxy.Type.HTTP,
-                    InetSocketAddress(proxyHost, proxyPort)
-                )
+            if(port == proxyPort) return
+            Logger.i("setproxy: $port.....")
+
+            setPref(PREF_PROXY_PORT, port)
+            proxyPort = port
+            //1.
+            System.getProperties().apply {
+                setProperty("http.proxyHost", proxyHost) //http.proxyHost
+                setProperty("http.proxyPort", proxyPort.toString()) //http.proxyPort
+                setProperty("https.proxyHost", proxyHost) //http.proxyHost
+                setProperty("https.proxyPort", proxyPort.toString()) //http.proxyPort
             }
+            //2.
+            proxy = Proxy(
+                Proxy.Type.HTTP,
+                InetSocketAddress(proxyHost, proxyPort)
+            )
         }
     }
 
@@ -58,19 +68,16 @@ class MyApp : Application() {
         proxyPort = getPref(PREF_PROXY_PORT, PROXY_PORT_FREEGATE)
         //1.
         System.getProperties().apply {
-            //1. OK
-            //etProperty("proxySet", "true")
-            //etProperty("proxyHost", PROXY_HOST)
-            //etProperty("proxyPort", PROXY_PORT.toString())
-
-            //2. 也许更好
             setProperty("http.proxyHost", proxyHost) //http.proxyHost
             setProperty("http.proxyPort", proxyPort.toString()) //http.proxyPort
             setProperty("https.proxyHost", proxyHost) //http.proxyHost
             setProperty("https.proxyPort", proxyPort.toString()) //http.proxyPort
         }
         //2.
-        setProxy(proxyPort)
+        proxy = Proxy(
+            Proxy.Type.HTTP,
+            InetSocketAddress(proxyHost, proxyPort)
+        )
     }
 
     private fun checkNightMode() {
