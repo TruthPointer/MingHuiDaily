@@ -51,11 +51,9 @@ class MyApp : Application() {
     }
 
     override fun onCreate() {
-        if (USE_PROXY) {
-            initProxy()
-        }
         super.onCreate()
         appContext = applicationContext
+        initProxy()
         checkNightMode()
     }
 
@@ -66,6 +64,7 @@ class MyApp : Application() {
     ///////////////////////////////////////////////////
     private fun initProxy() {
         proxyPort = getPref(PREF_PROXY_PORT, PROXY_PORT_FREEGATE)
+        if (!USE_PROXY) return
         //1.
         System.getProperties().apply {
             setProperty("http.proxyHost", proxyHost) //http.proxyHost
