@@ -350,7 +350,20 @@ object PageUtil {
             Logger.i(TAG, "完成处理iframe,video")
             onProgress(95, "适配网页文件：完成第7步修改")
 
-            //2.6 保存文件
+            //2.6 处理包含video的div
+            val videos = doc.select("div video")
+            videos.forEach { video ->
+                for (element in video.parents()) {
+                    if (element.tagName() == "div" && element.hasAttr("style")) {
+                        element.removeAttr("style")
+                        break
+                    }
+                }
+            }
+            Logger.i(TAG, "完成处理包含video的div")
+            onProgress(98, "适配网页文件：完成第8步修改")
+
+            //2.7 保存文件
             // 设置输出选项：禁用缩进，使用XHTML格式
             doc.outputSettings().prettyPrint(false)
             File(newFile).writeText(doc.html())
