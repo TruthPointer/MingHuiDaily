@@ -376,7 +376,11 @@ class MainActivity : AppCompatActivity() {
                 dispatchProgressInfo(
                     taskIndex, TaskInfo.TASK_NAME_LOAD_URL, newProgress, ""
                 )
-                if (newProgress == 100) closeTaskDialogOnUi()
+                //[20260418]避免一个网页加载过程中出现资源多次加载导致多次进度100%与其它操作时序差导致的错误动作
+                if (newProgress == 100) {
+                    val currentDatePart = DateUtils.date2String(selectedDate)
+                    if (view?.originalUrl?.contains(currentDatePart) == true) closeTaskDialogOnUi()
+                }
             }
 
             override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
