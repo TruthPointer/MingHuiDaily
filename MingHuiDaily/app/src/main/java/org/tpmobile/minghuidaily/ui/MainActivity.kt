@@ -248,6 +248,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        super.onDestroy()
         binding.webView.apply {
             loadUrl("about:blank")
             stopLoading()
@@ -258,7 +259,7 @@ class MainActivity : AppCompatActivity() {
             removeAllViews()
             destroy()
         }
-        super.onDestroy()
+        closeTaskDialogOnUi()
     }
 
     /////////////////////////////////////
@@ -674,9 +675,9 @@ class MainActivity : AppCompatActivity() {
                 return@OnClickListener
             }
             //2.
-            //selectedDate = date
-            //dateString = DateUtils.date2String(selectedDate).trim()
-            //setPref(PREF_CURRENT_BROWSING_DATE, dateString)
+            selectedDate = date
+            dateString = DateUtils.date2String(selectedDate).trim()
+            setPref(PREF_CURRENT_BROWSING_DATE, dateString)
             //3.
             checkAndLoadMyUrl(date)
         }
@@ -695,9 +696,9 @@ class MainActivity : AppCompatActivity() {
                 return@OnClickListener
             }
             //2.
-            //selectedDate = date
-            //dateString = DateUtils.date2String(selectedDate).trim()
-            //setPref(PREF_CURRENT_BROWSING_DATE, dateString)
+            selectedDate = date
+            dateString = DateUtils.date2String(selectedDate).trim()
+            setPref(PREF_CURRENT_BROWSING_DATE, dateString)
             //3.
             modifyHtmlAndLoadMyUrl(date)
         }
@@ -1079,9 +1080,8 @@ class MainActivity : AppCompatActivity() {
                 taskHistory = ""
 
                 //1.检查css、夜间模式，修改css style
-                if (!File(
-                        filesDir.absolutePath, "style.css"
-                    ).exists() || delegate.localNightMode != MyApp.currentNightMode
+                if (!File(filesDir.absolutePath, "style.css").exists() || 
+                    delegate.localNightMode != MyApp.currentNightMode
                 ) {
                     //修改夜间模式
                     if (delegate.localNightMode != MyApp.currentNightMode) {
