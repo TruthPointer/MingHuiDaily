@@ -30,7 +30,7 @@ class MyApp : Application() {
         )
 
         fun setProxy(port: Int) {
-            if(port == proxyPort) return
+            if (port == proxyPort) return
             Logger.i("setproxy: $port.....")
 
             setPref(PREF_PROXY_PORT, port)
