@@ -377,7 +377,7 @@ class MainActivity : AppCompatActivity() {
                 dispatchProgressInfo(
                     taskIndex, TaskInfo.TASK_NAME_LOAD_URL, newProgress, ""
                 )
-                //[20260418]避免一个网页加载过程中出现资源多次加载导致多次进度100%与其它操作时序差导致的错误动作
+                //[20260418]避免一个网页(eg:2026-4-13)加载过程中出现资源多次加载导致多次进度100%与其它操作时序差导致的错误动作
                 if (newProgress == 100) {
                     val currentDatePart = DateUtils.date2String(selectedDate)
                     if (view?.originalUrl?.contains(currentDatePart) == true) closeTaskDialogOnUi()
@@ -810,8 +810,7 @@ class MainActivity : AppCompatActivity() {
                     closeTaskDialogOnUi()
                     if (!fileNotFound) toastOnUi("${TaskInfo.TASK_NAME_DOWNLOAD}失败，详情：$info")
                     return@launch
-                }
-            )
+                })
             Logger.i(TAG, "filePah = $filePath")
             //2.unzip
             if (!isActive) return@launch
@@ -970,6 +969,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun closeTaskDialogOnUi(cancelTask: Boolean = true) {
+        Logger.i(TAG, "closeTaskDialogOnUi...")
         runOnUiThread {
             if (cancelTask) {
                 taskJob?.cancel(_root_ide_package_.kotlinx.coroutines.CancellationException())
@@ -1080,16 +1080,17 @@ class MainActivity : AppCompatActivity() {
                 taskHistory = ""
 
                 //1.检查css、夜间模式，修改css style
-                if (!File(filesDir.absolutePath, "style.css").exists() || 
-                    delegate.localNightMode != MyApp.currentNightMode
-                ) {
-                    //修改夜间模式
-                    if (delegate.localNightMode != MyApp.currentNightMode) {
-                        runOnUiThread {
-                            delegate.localNightMode = MyApp.currentNightMode
-                        }
+                //修改夜间模式
+                if (delegate.localNightMode != MyApp.currentNightMode) {
+                    runOnUiThread {
+                        delegate.localNightMode = MyApp.currentNightMode
                     }
-                    //修改网页模式
+                }
+
+                //修改网页模式
+                //  @IntDef({MODE_NIGHT_NO 1, MODE_NIGHT_YES 2, MODE_NIGHT_AUTO_TIME 0, MODE_NIGHT_FOLLOW_SYSTEM -1,
+                //      MODE_NIGHT_UNSPECIFIED -100, MODE_NIGHT_AUTO_BATTERY 3})
+                if (!File(filesDir.absolutePath, "style.css").exists()) {
                     taskIndex++
                     dispatchProgressInfo(
                         taskIndex,
