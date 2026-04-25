@@ -73,7 +73,7 @@ object HttpUtil {
         try {
             onProgress?.invoke(0, "开始下载...")
 
-            val connection = if(MyApp.USE_PROXY)
+            val connection = if (MyApp.USE_PROXY)
                 URL(urlString).openConnection(MyApp.proxy) as HttpURLConnection
             else
                 URL(urlString).openConnection() as HttpURLConnection
