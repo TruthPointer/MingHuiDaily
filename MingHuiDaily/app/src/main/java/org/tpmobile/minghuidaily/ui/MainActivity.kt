@@ -374,13 +374,15 @@ class MainActivity : AppCompatActivity() {
             override fun onProgressChanged(view: WebView?, newProgress: Int) {
                 //super.onProgressChanged(view, newProgress)
                 //Logger.i("PROGRESS", "$newProgress")
-                dispatchProgressInfo(
-                    taskIndex, TaskInfo.TASK_NAME_LOAD_URL, newProgress, ""
-                )
-                //[20260418]避免一个网页(eg:2026-4-13)加载过程中出现资源多次加载导致多次进度100%与其它操作时序差导致的错误动作
-                if (newProgress == 100) {
-                    val currentDatePart = DateUtils.date2String(selectedDate)
-                    if (view?.originalUrl?.contains(currentDatePart) == true) closeTaskDialogOnUi()
+                //[20260511]修复任务对话框进度显示，只为当前任务显示进度
+                if (view?.originalUrl?.contains(dateString) == true){
+                    dispatchProgressInfo(
+                        taskIndex, TaskInfo.TASK_NAME_LOAD_URL, newProgress, ""
+                    )
+                    //[20260418]避免一个网页(eg:2026-4-13)加载过程中出现资源多次加载导致多次进度100%与其它操作时序差导致的错误动作
+                    if (newProgress == 100) {
+                        closeTaskDialogOnUi()
+                    }
                 }
             }
 
