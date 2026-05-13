@@ -1,5 +1,5 @@
 [versions]
-agp = "9.1.1"
+agp = "9.2.1"
 coil = "2.7.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"
@@ -14,7 +14,7 @@ subsamplingScaleImageView = "3.10.0"
 webkit = "1.15.0"
 preferenceKtx = "1.2.1"
 zip4j = "2.11.6"
-jsoup = "1.22.1"
+jsoup = "1.22.2"
 volley = "1.2.1"
 recyclerview = "1.4.0"
 
