@@ -24,12 +24,7 @@
         <item name="android:statusBarColor">@color/color_3700B3</item>
         <item name="android:windowBackground">?android:colorBackground</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="actionOverflowButtonStyle">@style/MyOverflowButtonStyle</item>
 
-    </style>
-
-    <style name="MyOverflowButtonStyle" parent="Widget.AppCompat.ActionButton.Overflow">
-        <item name="android:tint">?attr/colorOnPrimary</item>
     </style>
 
     <style name="Theme.MingHuiDaily" parent="Base.Theme.MingHuiDaily" />
