@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.coil)
 
     implementation(libs.androidx.recyclerview)
+    implementation(libs.flexbox)
 
 }
 
