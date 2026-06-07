@@ -7,6 +7,11 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.flexbox.AlignContent
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
 import org.tpmobile.minghuidaily.R
 import org.tpmobile.minghuidaily.data.HistoryItem
 import org.tpmobile.minghuidaily.util.Logger
@@ -39,7 +44,11 @@ class HistoryAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.tvHistoryYearMonth.text = items[position].yearMonth
-        holder.rvHistoryDayList.layoutManager = GridLayoutManager(holder.itemView.context, 6)
+        holder.rvHistoryDayList.layoutManager = FlexboxLayoutManager(holder.itemView.context).apply {
+            flexDirection = FlexDirection.ROW
+            flexWrap = FlexWrap.WRAP
+        }
+        //= GridLayoutManager(holder.itemView.context, 6)
         holder.rvHistoryDayList.adapter =
             HistoryItemAdapter(items[position].selectedStateList) { yearMonth, itemDayPosition ->
                 //dateString = 2026年5月13
