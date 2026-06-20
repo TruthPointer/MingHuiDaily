@@ -1,5 +1,7 @@
 package org.tpmobile.minghuidaily.util
 
+
+import androidx.core.content.res.ResourcesCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -7,20 +9,23 @@ import org.jsoup.nodes.Element
 import org.jsoup.nodes.TextNode
 import org.jsoup.select.Elements
 import org.tpmobile.minghuidaily.MyApp
+import org.tpmobile.minghuidaily.R
 import org.tpmobile.minghuidaily.util.ktx.toFilePath
 import java.io.File
 import java.util.Date
 import kotlin.time.TimeSource
 
+
 object PageUtil {
     private const val TAG = "PageUtil"
 
     suspend fun generateStyleCss(
-        zoomScale: Int = 100, nightTheme: Boolean = false, fontSizeInTable: Float = 0.6f
+        zoomScale: Int = 100, nightTheme: Boolean = false
     ): Result<Boolean> = withContext(Dispatchers.IO) {
         val metrics = DisplayUtil.getDisplayMetrics(MyApp.appContext)
         val maxWidth = (metrics.widthPixels * 9 / 10 / metrics.density).toInt()
-        Logger.i(TAG, "generateStyleCss: maxWidth = $maxWidth")
+        val fontSizeInTable = ResourcesCompat.getFloat(MyApp.appContext.resources, R.dimen.font_size_in_table )
+        Logger.i(TAG, "generateStyleCss: maxWidth = $maxWidth, fontSizeInTable = $fontSizeInTable")
 
         var bgColor = "#FFFFFF"
         var textColor = "#000000"
