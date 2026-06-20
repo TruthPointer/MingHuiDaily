@@ -24,15 +24,9 @@ class HistoryAdapter(
     val itemsSelected = mutableSetOf<String>()
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val rvHistoryDayList: RecyclerView
-        val tvHistoryYearMonth: TextView
-        val cvYearMonth: CardView
-
-        init {
-            rvHistoryDayList = view.findViewById<RecyclerView>(R.id.rvHistoryDayList)
-            tvHistoryYearMonth = view.findViewById<TextView>(R.id.tvHistoryYearMonth)
-            cvYearMonth = view.findViewById<CardView>(R.id.cvYearMonth)
-        }
+        val rvHistoryDayList: RecyclerView = view.findViewById<RecyclerView>(R.id.rvHistoryDayList)
+        val tvHistoryYearMonth: TextView = view.findViewById<TextView>(R.id.tvHistoryYearMonth)
+        val cvYearMonth: CardView = view.findViewById<CardView>(R.id.cvYearMonth)
     }
 
     override fun onCreateViewHolder(
