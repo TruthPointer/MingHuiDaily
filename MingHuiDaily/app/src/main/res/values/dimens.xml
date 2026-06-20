@@ -1,4 +1,5 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="app_hope_vertical_padding">8dp</dimen>
+    <dimen name="font_size_in_table">0.7</dimen>
 </resources>
