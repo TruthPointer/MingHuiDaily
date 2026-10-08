@@ -1,3 +1,3 @@
 package org.tpmobile.minghuidaily.data
 
-data class YearMonthAndDay(val yearMonth: String, val day: Int)
+data class YearMonthAndDay(val yearMonth: String, val day: Int, val sortSec: String)
