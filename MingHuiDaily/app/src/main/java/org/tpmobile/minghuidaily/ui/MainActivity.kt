@@ -1330,16 +1330,21 @@ class MainActivity : AppCompatActivity() {
             }.distinct().filter { name -> name.matches(Regex("\\d{4}-\\d{1,2}-\\d{1,2}")) }
             .map { name ->
                 val s = name.split("-")
-                YearMonthAndDay("${s[0]}年${s[1].toInt()}月", s[2].toInt())
+                YearMonthAndDay(
+                    "${s[0]}年${s[1].toInt()}月",
+                    s[2].toInt(),
+                    String.format(Locale.US, "%s%2d", s[0], s[1].toInt())
+                )
             }.groupBy { it.yearMonth }
 
-        for (yearMonth in map.keys) {
+        val map2 = map.toSortedMap(compareBy { map[it]?.first()?.sortSec })
+        for (yearMonth in map2.keys) {
             var list =
-                map[yearMonth]?.map { SelectedStateOfHistoryItem(it.day, false) } ?: emptyList()
+                map2[yearMonth]?.map { SelectedStateOfHistoryItem(it.day, false) } ?: emptyList()
             list = list.sortedBy { it.day }
             if (list.isNotEmpty()) data.add(HistoryItem(yearMonth, list))
         }
-        return data.sortedBy { it.yearMonth }
+        return data
     }
 
 }
